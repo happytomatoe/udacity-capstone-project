@@ -1,0 +1,7 @@
+yapf
+isort
+autopep8
+pandas
+boto3
+ipython-sql
+psycopg2-binary
