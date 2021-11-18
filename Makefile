@@ -42,54 +42,57 @@ lint: venv
 	${PYTHON_VENV} -m pylint src/
 	${PYTHON_VENV} -m mypy
 
-jupter-install: venv
-	$(VENV_ACTIVATE)&&jupyter contrib nbextension install --user
-	jupyter nbextension enable snippets_menu/main
-	jupyter nbextension enable zenmode/main
-	jupyter nbextension enable contrib_nbextensions_help_item/main
-	jupyter nbextension enable autosavetime/main
-	jupyter nbextension enable codefolding/main
-	jupyter nbextension enable code_font_size/code_font_size
-	jupyter nbextension enable code_prettify/code_prettify
-	jupyter nbextension enable collapsible_headings/main
-	jupyter nbextension enable comment-uncomment/main
-	jupyter nbextension enable equation-numbering/main
-	jupyter nbextension enable execute_time/ExecuteTime
-	jupyter nbextension enable gist_it/main
-	jupyter nbextension enable hide_input/main
-	jupyter nbextension enable spellchecker/main
-	jupyter nbextension enable toc2/main
-	jupyter nbextension enable toggle_all_line_numbers/main
+jupyter-install: venv
+	( \
+	$(VENV_ACTIVATE); \
+	jupyter contrib nbextension install --user; \
+	jupyter nbextension enable snippets_menu/main; \
+	jupyter nbextension enable zenmode/main; \
+	jupyter nbextension enable contrib_nbextensions_help_item/main; \
+	jupyter nbextension enable autosavetime/main; \
+	jupyter nbextension enable codefolding/main; \
+	jupyter nbextension enable code_font_size/code_font_size; \
+	jupyter nbextension enable code_prettify/code_prettify; \
+	jupyter nbextension enable collapsible_headings/main; \
+	jupyter nbextension enable comment-uncomment/main; \
+	jupyter nbextension enable equation-numbering/main; \
+	jupyter nbextension enable execute_time/ExecuteTime; \
+	jupyter nbextension enable gist_it/main; \
+	jupyter nbextension enable hide_input/main; \
+	jupyter nbextension enable spellchecker/main; \
+	jupyter nbextension enable toc2/main; \
+	jupyter nbextension enable toggle_all_line_numbers/main; \
+	\
+	jupyter nbextension enable code_prettify/isort; \
+	jupyter nbextension enable select_keymap/main; \
+	jupyter nbextension enable table_beautifier/main; \
+	jupyter nbextension enable move_selected_cells/main; \
+	jupyter nbextension enable scratchpad/main; \
+	jupyter nbextension enable skip-traceback/main; \
+	jupyter nbextension enable tree-filter/index; \
+	jupyter nbextension enable varInspector/main; \
+	jupyter nbextension enable snippets/main; \
+	jupyter nbextension enable scroll_down/main; \
+	\
+	jupyter nbextension enable navigation-hotkeys/main; \
+    jupyter nbextension enable code_prettify/autopep8; \
+    \
+    jupyter nbextension enable runtools/main; \
+    #	jupyter nbextension enable keyboard_shortcut_editor/main \
+    # disable help(H) \
+    jupyter nbextension enable livemdpreview/livemdpreview; \
+    jupyter nbextension enable help_panel/help_panel; \
+    jupyter nbextension enable autoscroll/main; \
+    jupyter nbextension enable limit_output/main; \
+)
 
-	jupyter nbextension enable code_prettify/isort
-	jupyter nbextension enable select_keymap/main
-	jupyter nbextension enable table_beautifier/main
-	jupyter nbextension enable move_selected_cells/main
-	jupyter nbextension enable scratchpad/main
-	jupyter nbextension enable skip-traceback/main
-	jupyter nbextension enable tree-filter/index
-	jupyter nbextension enable varInspector/main
-	jupyter nbextension enable snippets/main
-	jupyter nbextension enable scroll_down/main
-
-	jupyter nbextension enable navigation-hotkeys/main
-	jupyter nbextension enable code_prettify/autopep8
-
-	jupyter nbextension enable runtools/main
-#	jupyter nbextension enable keyboard_shortcut_editor/main
-# disable help(H)
-
-	jupyter nbextension enable livemdpreview/livemdpreview
-	jupyter nbextension enable help_panel/help_panel
-	jupyter nbextension enable autoscroll/main
-	jupyter nbextension enable limit_output/main
-
-run: jupter-install
+run: jupyter-install
 	./setup.sh
-	$(VENV_ACTIVATE) &&jupyter notebook Capstone\ Project\ Template.ipynb
+	$(VENV_ACTIVATE);	jupyter notebook Capstone\ Project\ Template.ipynb
 
 doc: venv
 	$(VENV_ACTIVATE) && cd docs; make html
 
-package:
-	rm -f submission.zip&&cd src&&zip -j   ../submission.zip  etl.py create_tables.py sql_queries.py ../README.md
+clean:
+	rm -rf venv
+	find -iname "*.pyc" -delete
