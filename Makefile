@@ -2,7 +2,6 @@
 
 .PHONY: help prepare-dev test lint 	doc default
 
-SHELL := /bin/bash
 VENV_NAME?=venv
 VENV_ACTIVATE=. $(VENV_NAME)/bin/activate
 PYTHON_VENV=${VENV_NAME}/bin/python3
@@ -23,9 +22,6 @@ help:
 	@echo "make doc"
 	@echo "       build sphinx documentation"
 
-clean:
-	rm -rf $(VENV_NAME)
-
 prepare-dev:
 	sudo apt-get -y install python3.8 python3-pip
 	
@@ -33,9 +29,10 @@ create-venv:
 	python3 -m pip install virtualenv
 
 venv: requirements.txt
-	test -d $(VENV_NAME) || sudo python3 -m venv --without-pip $(VENV_NAME)
-	$(VENV_ACTIVATE)&&curl https://bootstrap.pypa.io/get-pip.py |sudo $(PYTHON_VENV)
-	$(VENV_ACTIVATE)&&${PYTHON_VENV} -m pip  install  -r requirements.txt
+	test -d $(VENV_NAME) || virtualenv -p python3 $(VENV_NAME)
+	${PYTHON_VENV} -m pip install -U pip
+	${PYTHON_VENV} -m pip  install  -r requirements.txt
+	touch $(VENV_NAME)/bin/activate
 
 
 test: venv
@@ -74,16 +71,22 @@ jupter-install: venv
 	jupyter nbextension enable varInspector/main
 	jupyter nbextension enable snippets/main
 	jupyter nbextension enable scroll_down/main
+
 	jupyter nbextension enable navigation-hotkeys/main
 	jupyter nbextension enable code_prettify/autopep8
+
 	jupyter nbextension enable runtools/main
+#	jupyter nbextension enable keyboard_shortcut_editor/main
+# disable help(H)
+
 	jupyter nbextension enable livemdpreview/livemdpreview
 	jupyter nbextension enable help_panel/help_panel
 	jupyter nbextension enable autoscroll/main
 	jupyter nbextension enable limit_output/main
 
-run: venv
-	source setup.sh&&echo $JAVA_HOME&&$(VENV_ACTIVATE) &&jupyter notebook Capstone\ Project\ Yelp.ipynb
+run: jupter-install
+	./setup.sh
+	$(VENV_ACTIVATE) &&jupyter notebook Capstone\ Project\ Template.ipynb
 
 doc: venv
 	$(VENV_ACTIVATE) && cd docs; make html
