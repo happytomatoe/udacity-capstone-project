@@ -40,6 +40,8 @@ Include a description of how you would approach the problem differently under th
 Criteria: has form of fact and dimensions tables
 1) https://www.kaggle.com/yelp-dataset/yelp-dataset?select=yelp_academic_dataset_business.json
 2) https://www.kaggle.com/yekahaaagayeham/ads-data-jobathon-june21-analytics-vidhya
-
+3) https://www.kaggle.com/rounakbanik/the-movies-dataset
+4) Airline data - https://community.amstat.org/jointscsg-section/dataexpo/dataexpo2009
+5) 
 # Yelp:
 1) Download dataset - https://www.kaggle.com/yelp-dataset/yelp-dataset

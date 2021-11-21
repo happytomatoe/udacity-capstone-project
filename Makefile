@@ -88,7 +88,7 @@ jupyter-install: venv
 
 run: jupyter-install
 	./setup.sh
-	$(VENV_ACTIVATE);	jupyter notebook  'Capstone Project Yelp.ipynb'
+	$(VENV_ACTIVATE);	jupyter notebook  'Capstone Project Movies.ipynb'
 
 doc: venv
 	$(VENV_ACTIVATE) && cd docs; make html
