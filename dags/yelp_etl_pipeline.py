@@ -37,4 +37,4 @@ with DAG('yelp_etl_pipeline',
 
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
-    start_operator >>  >> end_operator
+    start_operator >>  end_operator
