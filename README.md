@@ -47,4 +47,4 @@ Criteria: has form of fact and dimensions tables
 1) Download dataset - https://www.kaggle.com/yelp-dataset/yelp-dataset
 
 TODO: 
-- add tmdb api connector 
+- https://stackoverflow.com/questions/38825836/write-spark-dataframe-to-postgres-database
