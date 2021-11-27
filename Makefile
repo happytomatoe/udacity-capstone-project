@@ -5,6 +5,7 @@
 VENV_NAME?=venv
 VENV_ACTIVATE=. $(VENV_NAME)/bin/activate
 PYTHON_VENV=${VENV_NAME}/bin/python3
+PYSPARK_VENV=${VENV_NAME}/bin/pyspark
 PYTHON_LOCAL=python3
 
 default: create-venv run
@@ -96,3 +97,6 @@ doc: venv
 clean:
 	rm -rf venv
 	find -iname "*.pyc" -delete
+
+etl: venv
+	./venv/bin/spark-submit src/etl.py
