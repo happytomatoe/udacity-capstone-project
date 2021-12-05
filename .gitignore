@@ -184,3 +184,5 @@ files
 database
 data
 sas_data
+
+dwh/dwh.cfg
