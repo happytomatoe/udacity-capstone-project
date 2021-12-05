@@ -11,8 +11,10 @@ from helpers import TestCase
 
 DIMESIONS_LOAD_MODE = "delete-load"
 REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
+AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
+
 S3_BUCKET = Variable.get("s3_bucket", "yelp-data-sources")
-BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "log_data/")
+BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_user.json")
 # yelp_academic_dataset_user.json
 
 default_args = {
@@ -39,7 +41,7 @@ with DAG('yelp_etl_pipeline',
         schema="public",
         table="staging_businesses",
         redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id="aws_credentials",
+        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
         copy_options=dedent("""
         COMPUPDATE OFF STATUPDATE OFF
         FORMAT AS JSON 'auto ignorecase'
