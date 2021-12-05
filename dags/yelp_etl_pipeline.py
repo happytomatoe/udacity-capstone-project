@@ -11,10 +11,9 @@ from helpers import TestCase
 
 DIMESIONS_LOAD_MODE = "delete-load"
 REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
-S3_BUCKET = Variable.get("s3_bucket", "udacity-dend")
-LOG_DATA_S3_KEY = Variable.get("log_data_s3_key", "log_data/")
-SONG_DATA_S3_KEY = Variable.get("song_data_s3_key", "song_data/A/A/C")
-
+S3_BUCKET = Variable.get("s3_bucket", "yelp-data-sources")
+BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "log_data/")
+# yelp_academic_dataset_user.json
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -33,8 +32,24 @@ with DAG('yelp_etl_pipeline',
          ) as dag:
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
-
+    stage_businesses_to_redshift = StageToRedshiftOperator(
+        task_id='Stage_businesses',
+        s3_bucket=S3_BUCKET,
+        s3_key=BUSINESS_DATA_S3_KEY,
+        schema="public",
+        table="staging_businesses",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        aws_conn_id="aws_credentials",
+        copy_options=dedent("""
+        COMPUPDATE OFF STATUPDATE OFF
+        FORMAT AS JSON 'auto ignorecase'
+        TIMEFORMAT AS 'epochmillisecs'
+        TRUNCATECOLUMNS
+        BLANKSASNULL;
+        """),
+        dag=dag
+    )
 
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
-    start_operator >>  end_operator
+    start_operator >> stage_businesses_to_redshift >> end_operator
