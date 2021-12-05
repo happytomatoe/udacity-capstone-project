@@ -57,3 +57,47 @@ ALTER TABLE "business_dim_category" ADD FOREIGN KEY ("business_id") REFERENCES "
 ALTER TABLE "tip_dim" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
 
 ALTER TABLE "tip_dim" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_id");
+
+
+-- staging
+
+create table staging_users
+(
+    average_stars double precision,
+    compliment_cool bigint,
+    compliment_cute bigint,
+    compliment_funny bigint,
+    compliment_hot bigint,
+    compliment_list bigint,
+    compliment_more bigint,
+    compliment_note bigint,
+    compliment_photos bigint,
+    compliment_plain bigint,
+    compliment_profile bigint,
+    compliment_writer bigint,
+    cool bigint,
+    elite text,
+    fans bigint,
+    friends text,
+    funny bigint,
+    name text,
+    review_count bigint,
+    useful bigint,
+    user_id text,
+    yelping_since text
+);
+
+
+create table staging_reviews
+(
+    business_id text,
+    cool bigint,
+    date text,
+    funny bigint,
+    review_id text,
+    stars double precision,
+    text text,
+    useful bigint,
+    user_id text
+);
+

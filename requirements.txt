@@ -1,4 +1,4 @@
-pyspark
+py4j
 pandas
 jupyter
 ipykernel

@@ -1,7 +1,11 @@
 #!/bin/bash
 
+
+#TODO: add to .bashrc
+export JAVA_HOME=/home/babkamen/.sdkman/candidates/java/current
+export SPARK_HOME=/home/babkamen/Documents/spark-3.2.0-bin-hadoop3.2
+export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
 export PYSPARK_DRIVER_PYTHON="jupyter"
-export PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=8889"
-export SPARK_LOCAL_IP="172.31.46.15"
-export PYSPARK_SUBMIT_ARGS="--master local[2] pyspark-shell"
-export JAVA_HOME=~/.sdkman/candidates/java/current
+export PYSPARK_DRIVER_PYTHON_OPTS="notebook"
+export PYSPARK_PYTHON=python3
+export PATH=$SPARK_HOME:$PATH
