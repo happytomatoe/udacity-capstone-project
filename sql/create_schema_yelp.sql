@@ -59,7 +59,7 @@ ALTER TABLE "tip_dim" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" 
 ALTER TABLE "tip_dim" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_id");
 
 
--- staging
+-- STAGING ---
 
 create table staging_users
 (
