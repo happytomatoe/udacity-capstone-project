@@ -101,3 +101,18 @@ create table staging_reviews
     user_id text
 );
 
+create table staging_businesses
+(
+    address text,
+    business_id text,
+    categories text,
+    city text,
+    is_open bigint,
+    latitude double precision,
+    longitude double precision,
+    name text,
+    postal_code text,
+    review_count bigint,
+    stars double precision,
+    state text
+);
