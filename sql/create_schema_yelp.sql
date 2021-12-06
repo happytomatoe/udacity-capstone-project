@@ -63,6 +63,7 @@ ALTER TABLE "tip_dim" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_i
 
 create table staging_users
 (
+    user_id char(22),
     average_stars double precision,
     compliment_cool bigint,
     compliment_cute bigint,
@@ -83,36 +84,49 @@ create table staging_users
     name text,
     review_count bigint,
     useful bigint,
-    user_id text,
     yelping_since text
 );
 
-
 create table staging_reviews
 (
-    business_id text,
+    review_id char(22),
+    user_id char(22),
+    "business_id" char(22),
     cool bigint,
-    date text,
+    date date,
     funny bigint,
-    review_id text,
-    stars double precision,
-    text text,
-    useful bigint,
-    user_id text
+    stars real,
+    text varchar(5000),
+    useful bigint
+);
+
+CREATE TABLE "business_dim" (
+                                "business_id" char(22) PRIMARY KEY,
+                                "name" varchar,
+                                "adress" varchar,
+                                "city" varchar,
+                                "state" char(2),
+                                "postal_code" varchar,
+                                "latitude" numeric,
+                                "longitude" numeric,
+                                "stars" real,
+                                "review_count" int2,
+                                "is_open" boolean
 );
 
 create table staging_businesses
 (
+    business_id char(22),
     address text,
-    business_id text,
     categories text,
     city text,
-    is_open bigint,
+    is_open boolean,
+--     TODO: check if need to change
     latitude double precision,
     longitude double precision,
     name text,
     postal_code text,
     review_count bigint,
-    stars double precision,
-    state text
+    stars real,
+    state char(2)
 );
