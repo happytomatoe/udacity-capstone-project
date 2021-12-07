@@ -39,7 +39,7 @@ with DAG('yelp_etl_pipeline',
     create_tables_if_not_exist = PostgresOperator(
         task_id="create_tables_if_not_exist",
         postgres_conn_id=REDSHIFT_CONN_ID,
-        sql="sql/create_schema_yelp.sql",
+        sql="sql/create_schema.sql",
     )
 
     stage_businesses_to_redshift = StageToRedshiftOperator(
