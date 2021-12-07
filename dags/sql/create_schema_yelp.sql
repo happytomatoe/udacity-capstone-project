@@ -1,4 +1,4 @@
-CREATE TABLE "review_fact" (
+CREATE TABLE IF NOT EXISTS "review_fact" (
   "review_id" char(22) PRIMARY KEY,
   "user_id" char(22),
   "business_id" char(22),
@@ -10,7 +10,7 @@ CREATE TABLE "review_fact" (
   "cool" int2
 );
 
-CREATE TABLE "business_dim" (
+CREATE TABLE IF NOT EXISTS "business_dim" (
   "business_id" char(22) PRIMARY KEY,
   "name" varchar,
   "adress" varchar,
@@ -24,12 +24,12 @@ CREATE TABLE "business_dim" (
   "is_open" boolean
 );
 
-CREATE TABLE "business_dim_category" (
+CREATE TABLE IF NOT EXISTS "business_dim_category" (
   "category" varchar,
   "business_id" char(22)
 );
 
-CREATE TABLE "user_dim" (
+CREATE TABLE IF NOT EXISTS "user_dim" (
   "user_id" char(22) PRIMARY KEY,
   "name" varchar,
   "yelping_since" date,
@@ -40,7 +40,7 @@ CREATE TABLE "user_dim" (
   "avg_stars" int
 );
 
-CREATE TABLE "tip_dim" (
+CREATE TABLE IF NOT EXISTS "tip_dim" (
   "business_id" char(22),
   "user_id" char(22),
   "text" varchar,
@@ -61,7 +61,7 @@ ALTER TABLE "tip_dim" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_i
 
 -- STAGING ---
 
-create table staging_users
+CREATE TABLE IF NOT EXISTS staging_users
 (
     user_id char(22),
     average_stars double precision,
@@ -87,7 +87,7 @@ create table staging_users
     yelping_since text
 );
 
-create table staging_reviews
+CREATE TABLE IF NOT EXISTS staging_reviews
 (
     review_id char(22),
     user_id char(22),
@@ -100,7 +100,7 @@ create table staging_reviews
     useful bigint
 );
 
-CREATE TABLE "business_dim" (
+CREATE TABLE IF NOT EXISTS "business_dim" (
                                 "business_id" char(22) PRIMARY KEY,
                                 "name" varchar,
                                 "adress" varchar,
@@ -114,7 +114,7 @@ CREATE TABLE "business_dim" (
                                 "is_open" boolean
 );
 
-create table staging_businesses
+CREATE TABLE IF NOT EXISTS staging_businesses
 (
     business_id char(22),
     address text,

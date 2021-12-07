@@ -12,3 +12,5 @@ pandas
 boto3
 ipython-sql
 psycopg2-binary
+
+apache-airflow == 1.10.15

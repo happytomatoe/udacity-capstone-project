@@ -4,7 +4,7 @@ from textwrap import dedent
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators import (StageToRedshiftOperator, LoadFactOperator, LoadDimensionOperator,
-                               DataQualityOperator)
+                               DataQualityOperator, PostgresOperator)
 from airflow.operators.dummy_operator import DummyOperator
 
 from helpers import TestCase
@@ -12,6 +12,7 @@ from helpers import TestCase
 DIMESIONS_LOAD_MODE = "delete-load"
 REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
 AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
+TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 
 S3_BUCKET = Variable.get("s3_bucket", "yelp-data-sources")
 BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
@@ -35,11 +36,17 @@ with DAG('yelp_etl_pipeline',
          ) as dag:
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
+    create_tables_if_not_exist = PostgresOperator(
+        task_id="create_tables_if_not_exist",
+        postgres_conn_id=REDSHIFT_CONN_ID,
+        sql="sql/create_schema_yelp.sql",
+    )
+
     stage_businesses_to_redshift = StageToRedshiftOperator(
         task_id='stage_businesses',
         s3_bucket=S3_BUCKET,
         s3_key=BUSINESS_DATA_S3_KEY,
-        schema="public",
+        schema=TABLES_SCHEMA,
         table="staging_businesses",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
@@ -57,7 +64,7 @@ with DAG('yelp_etl_pipeline',
         task_id='stage_users',
         s3_bucket=S3_BUCKET,
         s3_key=USERS_DATA_S3_KEY,
-        schema="public",
+        schema=TABLES_SCHEMA,
         table="staging_users",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
@@ -75,7 +82,7 @@ with DAG('yelp_etl_pipeline',
         task_id='stage_reviews',
         s3_bucket=S3_BUCKET,
         s3_key=REVIEWS_DATA_S3_KEY,
-        schema="public",
+        schema=TABLES_SCHEMA,
         table="staging_reviews",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
@@ -91,4 +98,6 @@ with DAG('yelp_etl_pipeline',
 
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
-    start_operator >> [stage_businesses_to_redshift, stage_users_to_redshift, stage_reviews_to_redshift] >> end_operator
+    start_operator >> create_tables_if_not_exist >> \
+    [stage_businesses_to_redshift, stage_users_to_redshift, stage_reviews_to_redshift] \
+    >> end_operator
