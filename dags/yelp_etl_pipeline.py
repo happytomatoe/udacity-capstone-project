@@ -14,7 +14,7 @@ REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
 AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
 TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 
-S3_BUCKET = Variable.get("s3_bucket", "yelp-data-sources")
+S3_BUCKET = Variable.get("s3_bucket", "udacity-data-modelling")
 BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
 USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
