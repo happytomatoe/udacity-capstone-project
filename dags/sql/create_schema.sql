@@ -2,49 +2,50 @@ CREATE TABLE IF NOT EXISTS "review_fact" (
   "review_id" char(22) PRIMARY KEY,
   "user_id" char(22),
   "business_id" char(22),
-  "stars" real,
+  "stars" int2,
   "date" date,
   "text" varchar(5000),
-  "usefull" int2,
-  "funny" int2,
-  "cool" int2
+  "usefull" int4,
+  "funny" int4,
+  "cool" int4
 );
 
 CREATE TABLE IF NOT EXISTS "business_dim" (
   "business_id" char(22) PRIMARY KEY,
-  "name" varchar,
-  "adress" varchar,
-  "city" varchar,
+  "name" text,
+  "adress" text,
+  "city" text,
   "state" char(2),
-  "postal_code" varchar,
+--   TODO: change
+  "postal_code" text,
   "latitude" numeric,
   "longitude" numeric,
-  "stars" real,
-  "review_count" int2,
+  "stars" int2,
+  "review_count" int4,
   "is_open" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "business_dim_category" (
-  "category" varchar,
+  "category" text,
   "business_id" char(22)
 );
 
 CREATE TABLE IF NOT EXISTS "user_dim" (
   "user_id" char(22) PRIMARY KEY,
-  "name" varchar,
-  "yelping_since" date,
-  "usefull" int2,
-  "funny" int2,
-  "cool" int2,
-  "fans" int,
-  "avg_stars" int
+  "name" text,
+  "yelping_since" timestamp,
+  "usefull" int4,
+  "funny" int4,
+  "cool" int4,
+  "fans" int4,
+  "avg_stars" int4
 );
 
 CREATE TABLE IF NOT EXISTS "tip_dim" (
   "business_id" char(22),
   "user_id" char(22),
-  "text" varchar,
-  "compliment_count" int,
+  "text" text,
+  "compliment_count" int4,
   "create_date" date
 );
 
@@ -64,27 +65,28 @@ ALTER TABLE "tip_dim" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_i
 CREATE TABLE IF NOT EXISTS staging_users
 (
     user_id char(22),
-    average_stars double precision,
-    compliment_cool bigint,
-    compliment_cute bigint,
-    compliment_funny bigint,
-    compliment_hot bigint,
-    compliment_list bigint,
-    compliment_more bigint,
-    compliment_note bigint,
-    compliment_photos bigint,
-    compliment_plain bigint,
-    compliment_profile bigint,
-    compliment_writer bigint,
-    cool bigint,
+    average_stars real,
+    compliment_cool int4,
+    compliment_cute int4,
+    compliment_funny int4,
+    compliment_hot int4,
+    compliment_list int4,
+    compliment_more int4,
+    compliment_note int4,
+    compliment_photos int4,
+    compliment_plain int4,
+    compliment_profile int4,
+    compliment_writer int4,
+    cool int4,
     elite text,
-    fans bigint,
+    fans int4,
     friends text,
-    funny bigint,
+    funny int4,
     name text,
-    review_count bigint,
-    useful bigint,
-    yelping_since text
+    review_count int4,
+    useful int4,
+--     TODO: Do we need timestamp or should I use date or int YYYYMMDD?
+    yelping_since timestamp
 );
 
 CREATE TABLE IF NOT EXISTS staging_reviews
@@ -92,26 +94,12 @@ CREATE TABLE IF NOT EXISTS staging_reviews
     review_id char(22),
     user_id char(22),
     "business_id" char(22),
-    cool bigint,
-    date date,
-    funny bigint,
+    cool int4,
+    date timestamp,
+    funny int4,
     stars real,
     text varchar(5000),
-    useful bigint
-);
-
-CREATE TABLE IF NOT EXISTS "business_dim" (
-                                "business_id" char(22) PRIMARY KEY,
-                                "name" varchar,
-                                "adress" varchar,
-                                "city" varchar,
-                                "state" char(2),
-                                "postal_code" varchar,
-                                "latitude" numeric,
-                                "longitude" numeric,
-                                "stars" real,
-                                "review_count" int2,
-                                "is_open" boolean
+    useful int4
 );
 
 CREATE TABLE IF NOT EXISTS staging_businesses
@@ -126,7 +114,7 @@ CREATE TABLE IF NOT EXISTS staging_businesses
     longitude double precision,
     name text,
     postal_code text,
-    review_count bigint,
+    review_count int4,
     stars real,
     state char(2)
 );

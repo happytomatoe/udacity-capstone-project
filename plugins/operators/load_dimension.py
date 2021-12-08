@@ -20,7 +20,7 @@ class LoadDimensionOperator(BaseOperator):
     load_modes = ['append', 'delete-load']
     ui_color = '#80BD9E'
     dimensions = {
-#         "users": SqlQueries.user_table_insert.format("users"),
+        "user_dim": SqlQueries.user_table_insert,
 #         "time": SqlQueries.time_table_insert.format("time"),
 #         "artists": SqlQueries.artist_table_insert.format("artists"),
 #         "songs": SqlQueries.song_table_insert.format("songs"),
