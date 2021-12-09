@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
-
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators import (LoadFactOperator, LoadDimensionOperator)
+from airflow.operators import (LoadFactOperator, LoadDimensionOperator, DataQualityOperator)
 from airflow.operators.subdag_operator import SubDagOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.dummy_operator import DummyOperator
-from helpers import SqlQueries
+from helpers import SqlQueries, TestCase
 
 from subdags import load_subdag
 
@@ -68,9 +67,19 @@ with DAG(DAG_NAME,
         dag=dag
     )
 
-    end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
+    run_quality_checks = DataQualityOperator(
+        task_id='Run_data_quality_checks',
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        test_cases=[
+            TestCase("SELECT  COUNT(*)>0 FROM review_fact", True),
+            TestCase("SELECT  COUNT(*)>0 FROM business_dim", True),
+            TestCase("SELECT  COUNT(*)>0 FROM user_dim", True),
+            TestCase("SELECT  COUNT(*)>0 FROM tip_dim", False),
+        ],
+        dag=dag
+    )
 
-    start_operator >> create_tables_if_not_exist
+    end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
     if enable_staging:
         staging_processes = SubDagOperator(
@@ -82,11 +91,11 @@ with DAG(DAG_NAME,
         )
         start_operator >> create_tables_if_not_exist >> staging_processes >> \
         [load_user_dimension_table, load_business_dimension_table, load_review_table] >> \
-        end_operator
+        run_quality_checks >> end_operator
     else:
         start_operator >> create_tables_if_not_exist >> \
         [load_user_dimension_table, load_business_dimension_table, load_review_table] >> \
-        end_operator
+        run_quality_checks >> end_operator
 
     #     [stage_businesses_to_redshift, stage_users_to_redshift, stage_reviews_to_redshift]
     #
