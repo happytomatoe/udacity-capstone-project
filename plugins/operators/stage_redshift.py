@@ -63,6 +63,6 @@ class StageToRedshiftOperator(BaseOperator):
 
         redshift_hook.run(f"TRUNCATE TABLE {self.schema}.{self.table}", True)
 
-        redshift_hook.run(copy_query, True)
+        redshift_hook.run(copy_query, autocommit=True)
         for output in redshift_hook.conn.notices:
             self.log.info(output)

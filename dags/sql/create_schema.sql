@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "review_fact" (
 CREATE TABLE IF NOT EXISTS "business_dim" (
   "business_id" char(22) PRIMARY KEY,
   "name" text,
-  "adress" text,
+  "address" text,
   "city" text,
   "state" char(2),
 --   TODO: change
