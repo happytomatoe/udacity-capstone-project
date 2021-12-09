@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "business_dim" (
   "city" text,
   "state" char(2),
 --   TODO: change
-  "postal_code" text,
+  "postal_code" varchar(32),
   "latitude" double precision,
   "longitude" double precision,
   "stars" real,
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS staging_businesses
     latitude double precision,
     longitude double precision,
     name text,
-    postal_code text,
+    postal_code varchar(32),
     review_count int4,
     stars real,
     state char(2)
