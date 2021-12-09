@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators import (LoadFactOperator, LoadDimensionOperator,
-                               PostgresOperator, SubDagOperator)
+from airflow.operators import (LoadFactOperator, LoadDimensionOperator)
+from airflow.operators.subdag_operator import SubDagOperator
+from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.dummy_operator import DummyOperator
 from helpers import SqlQueries
 

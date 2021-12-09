@@ -10,6 +10,21 @@ CREATE TABLE IF NOT EXISTS "review_fact" (
   "cool" int4
 );
 
+
+CREATE TABLE IF NOT EXISTS "user_dim" (
+  "user_id" char(22) PRIMARY KEY,
+  "name" text,
+  "yelping_since" timestamp,
+--   TODO: do we need review_count?
+  "usefull" int4,
+  "funny" int4,
+  "cool" int4,
+  "fans" int4,
+  "avg_stars" int4
+);
+
+-- TODO: add date dimension
+-- FIXME: lat, lon converted to int
 CREATE TABLE IF NOT EXISTS "business_dim" (
   "business_id" char(22) PRIMARY KEY,
   "name" text,
@@ -18,27 +33,17 @@ CREATE TABLE IF NOT EXISTS "business_dim" (
   "state" char(2),
 --   TODO: change
   "postal_code" text,
-  "latitude" numeric,
-  "longitude" numeric,
-  "stars" int2,
+  "latitude" double precision,
+  "longitude" double precision,
+  "stars" real,
   "review_count" int4,
   "is_open" boolean
 );
 
-CREATE TABLE IF NOT EXISTS "business_dim_category" (
+-- TODO: do I need spark for this?
+CREATE TABLE IF NOT EXISTS "business_category_fact" (
   "category" text,
   "business_id" char(22)
-);
-
-CREATE TABLE IF NOT EXISTS "user_dim" (
-  "user_id" char(22) PRIMARY KEY,
-  "name" text,
-  "yelping_since" timestamp,
-  "usefull" int4,
-  "funny" int4,
-  "cool" int4,
-  "fans" int4,
-  "avg_stars" int4
 );
 
 CREATE TABLE IF NOT EXISTS "tip_dim" (
@@ -53,7 +58,7 @@ ALTER TABLE "review_fact" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("us
 
 ALTER TABLE "review_fact" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
 
-ALTER TABLE "business_dim_category" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
+ALTER TABLE "business_category_fact" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
 
 ALTER TABLE "tip_dim" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
 
