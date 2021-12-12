@@ -1,4 +1,6 @@
-CREATE TABLE IF NOT EXISTS "review_fact" (
+-- FACTS ---
+
+CREATE TABLE IF NOT EXISTS "fact_review" (
   "review_id" char(22) PRIMARY KEY,
   "user_id" char(22),
   "business_id" char(22),
@@ -11,7 +13,17 @@ CREATE TABLE IF NOT EXISTS "review_fact" (
 );
 
 
-CREATE TABLE IF NOT EXISTS "user_dim" (
+-- TODO: do I need spark for this?
+CREATE TABLE IF NOT EXISTS "fact_business_category" (
+  "category" text,
+  "business_id" char(22)
+);
+
+
+
+-- ***DIMENSIONS*** ---
+
+CREATE TABLE IF NOT EXISTS "dim_user" (
   "user_id" char(22) PRIMARY KEY,
   "name" text,
   "yelping_since" timestamp,
@@ -25,7 +37,7 @@ CREATE TABLE IF NOT EXISTS "user_dim" (
 
 -- TODO: add date dimension
 -- FIXME: lat, lon converted to int
-CREATE TABLE IF NOT EXISTS "business_dim" (
+CREATE TABLE IF NOT EXISTS "dim_business" (
   "business_id" char(22) PRIMARY KEY,
   "name" text,
   "address" text,
@@ -40,13 +52,7 @@ CREATE TABLE IF NOT EXISTS "business_dim" (
   "is_open" boolean
 );
 
--- TODO: do I need spark for this?
-CREATE TABLE IF NOT EXISTS "business_category_fact" (
-  "category" text,
-  "business_id" char(22)
-);
-
-CREATE TABLE IF NOT EXISTS "tip_dim" (
+CREATE TABLE IF NOT EXISTS "dim_tip" (
   "business_id" char(22),
   "user_id" char(22),
   "text" text,
@@ -54,15 +60,15 @@ CREATE TABLE IF NOT EXISTS "tip_dim" (
   "create_date" date
 );
 
-ALTER TABLE "review_fact" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_id");
+ALTER TABLE "fact_review" ADD FOREIGN KEY ("user_id") REFERENCES "dim_user" ("user_id");
 
-ALTER TABLE "review_fact" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
+ALTER TABLE "fact_review" ADD FOREIGN KEY ("business_id") REFERENCES "dim_business" ("business_id");
 
-ALTER TABLE "business_category_fact" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
+ALTER TABLE "fact_business_category" ADD FOREIGN KEY ("business_id") REFERENCES "dim_business" ("business_id");
 
-ALTER TABLE "tip_dim" ADD FOREIGN KEY ("business_id") REFERENCES "business_dim" ("business_id");
+ALTER TABLE "dim_tip" ADD FOREIGN KEY ("business_id") REFERENCES "dim_business" ("business_id");
 
-ALTER TABLE "tip_dim" ADD FOREIGN KEY ("user_id") REFERENCES "user_dim" ("user_id");
+ALTER TABLE "dim_tip" ADD FOREIGN KEY ("user_id") REFERENCES "dim_user" ("user_id");
 
 
 -- STAGING ---
@@ -123,3 +129,4 @@ CREATE TABLE IF NOT EXISTS staging_businesses
     stars real,
     state char(2)
 );
+
