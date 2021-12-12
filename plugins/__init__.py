@@ -6,9 +6,8 @@ import helpers
 import operators
 
 
-# Defining the plugin class
-class UdacityPlugin(AirflowPlugin):
-    name = "udacity_plugin"
+class ETLPlugin(AirflowPlugin):
+    name = "etl_plugin"
     operators = [
         operators.StageToRedshiftOperator,
         operators.LoadFactOperator,
@@ -16,6 +15,6 @@ class UdacityPlugin(AirflowPlugin):
         operators.DataQualityOperator
     ]
     helpers = [
-        helpers.SqlQueries,
         helpers.TestCase,
+        helpers.TableInsertQueries,
     ]

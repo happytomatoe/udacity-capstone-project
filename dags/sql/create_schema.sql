@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS "dim_business" (
   "name" text,
   "address" text,
   "city" text,
-  "state" char(2),
+--   TODO: check if there are many 3 char states
+  "state" varchar(3),
 --   TODO: change
   "postal_code" varchar(32),
   "latitude" double precision,
@@ -127,6 +128,6 @@ CREATE TABLE IF NOT EXISTS staging_businesses
     postal_code varchar(32),
     review_count int4,
     stars real,
-    state char(2)
+    state varchar(3)
 );
 

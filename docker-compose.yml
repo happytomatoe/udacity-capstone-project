@@ -110,6 +110,7 @@ services:
     command: worker
     depends_on:
       - scheduler
+      - postgres
     
     deploy:
       restart_policy:

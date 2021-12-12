@@ -33,6 +33,15 @@ class StageToRedshiftOperator(BaseOperator):
             {copy_options}
         """)
 
+    # COPY_QUERY_TEMPLATE = dedent("""
+    #         COPY {schema}.{table}
+    #         FROM '{s3_bucket}/{s3_key}'
+    #         WITH CREDENTIALS
+    #         'aws_access_key_id={access_key};aws_secret_access_key={secret_key}'
+    #         {copy_options}
+    #     """)
+
+
     ui_color = '#358140'
     template_fields = ["s3_key"]
 
