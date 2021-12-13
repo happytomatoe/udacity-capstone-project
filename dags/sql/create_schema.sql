@@ -1,133 +1,172 @@
--- FACTS ---
+-- ***DIMENSIONS*** ---
 
-CREATE TABLE IF NOT EXISTS "fact_review" (
-  "review_id" char(22) PRIMARY KEY,
-  "user_id" char(22),
-  "business_id" char(22),
-  "stars" int2,
-  "date" date,
-  "text" varchar(5000),
-  "usefull" int4,
-  "funny" int4,
-  "cool" int4
+CREATE TABLE IF NOT EXISTS "dim_user"
+(
+    "user_id"       char(22) PRIMARY KEY,
+    "name"          text,
+    "yelping_since" timestamp references dim_date_time,
+--   TODO: do we need review_count?
+    "usefull"       int4,
+    "funny"         int4,
+    "cool"          int4,
+    "fans"          int4,
+    "avg_stars"     int4
+);
+
+CREATE TABLE IF NOT EXISTS "dim_date_time"
+(
+    date_time timestamp PRIMARY KEY,
+    hour      int2,
+    minute    int2,
+    day       int2,
+    week      int2,
+    weekday   int2,
+    month     int2,
+    year      int2
+);
+
+-- Date Key (PK)
+-- Date
+-- Full Date Description
+-- Day of Week
+-- Day Number in Calendar Month
+-- Day Number in Calendar Year
+-- Calendar Week Ending Date
+-- Calendar Week Number in Year
+-- Calendar Month Name
+-- Calendar Month Number in Year
+-- Calendar Year-Month (YYYY-MM)
+-- Calendar Quarter
+-- Calendar Year-Quarter
+-- Calendar Year
+-- Holiday Indicator
+-- Weekday Indicator
+-- SQL Date Stamp
+
+-- FIXME: lat, lon converted to int
+CREATE TABLE IF NOT EXISTS "dim_business"
+(
+    "business_id"  char(22) PRIMARY KEY,
+    "name"         text,
+    "address"      text,
+    "city"         text,
+--   TODO: check if there are many 3 char states
+    "state"        varchar(3),
+--   TODO: change
+    "postal_code"  varchar(32),
+    "latitude"     double precision,
+    "longitude"    double precision,
+    "stars"        real,
+    "review_count" int4,
+    "is_open"      boolean
+);
+
+
+-- FACTS ---
+-- TODO: add surogate keys?
+-- TODO: add ids to fact tables?
+
+CREATE TABLE IF NOT EXISTS "fact_review"
+(
+    "review_id"   char(22) PRIMARY KEY,
+    "user_id"     char(22) references dim_user,
+    "business_id" char(22) references dim_business,
+    "stars"       int2,
+    "date"        date,
+    "text"        varchar(5000),
+    "usefull"     int4,
+    "funny"       int4,
+    "cool"        int4
 );
 
 
 -- TODO: do I need spark for this?
-CREATE TABLE IF NOT EXISTS "fact_business_category" (
-  "category" text,
-  "business_id" char(22)
+CREATE TABLE IF NOT EXISTS "fact_business_category"
+(
+    "category"    text,
+    "business_id" char(22) references dim_business
 );
 
+-- tips
+-- {"user_id":"sNVpZLDSlCudlXLsnJpg7A","business_id":"Wqetc51pFQzz04SXh_AORA","text":"So busy...","date":"2014-06-07 12:09:55","compliment_count":0}
 
-
--- ***DIMENSIONS*** ---
-
-CREATE TABLE IF NOT EXISTS "dim_user" (
-  "user_id" char(22) PRIMARY KEY,
-  "name" text,
-  "yelping_since" timestamp,
---   TODO: do we need review_count?
-  "usefull" int4,
-  "funny" int4,
-  "cool" int4,
-  "fans" int4,
-  "avg_stars" int4
+CREATE TABLE IF NOT EXISTS fact_tip
+(
+    user_id          char(22) references dim_user,
+    business_id      char(22) references dim_business,
+    text             varchar(5000),
+    compliment_count int2
 );
 
--- TODO: add date dimension
--- FIXME: lat, lon converted to int
-CREATE TABLE IF NOT EXISTS "dim_business" (
-  "business_id" char(22) PRIMARY KEY,
-  "name" text,
-  "address" text,
-  "city" text,
---   TODO: check if there are many 3 char states
-  "state" varchar(3),
---   TODO: change
-  "postal_code" varchar(32),
-  "latitude" double precision,
-  "longitude" double precision,
-  "stars" real,
-  "review_count" int4,
-  "is_open" boolean
+-- checkins
+-- {"business_id":"--0zrn43LEaB4jUWTQH_Bg","date":"2010-10-08 22:21:20, 2010-11-01 21:29:14, 2010-12-23 22:55:45,
+-- 2011-04-08 17:14:59, 2011-04-11 21:28:45, 2011-04-26 16:42:25, 2011-05-20 19:30:57, 2011-05-24 20:02:21, 2011-08-29 19:01:31"}
+
+CREATE TABLE IF NOT EXISTS "fact_checkin"
+(
+    "business_id" char(22) references dim_business,
+    "date_id"     timestamp references dim_date_time
 );
-
-CREATE TABLE IF NOT EXISTS "dim_tip" (
-  "business_id" char(22),
-  "user_id" char(22),
-  "text" text,
-  "compliment_count" int4,
-  "create_date" date
-);
-
-ALTER TABLE "fact_review" ADD FOREIGN KEY ("user_id") REFERENCES "dim_user" ("user_id");
-
-ALTER TABLE "fact_review" ADD FOREIGN KEY ("business_id") REFERENCES "dim_business" ("business_id");
-
-ALTER TABLE "fact_business_category" ADD FOREIGN KEY ("business_id") REFERENCES "dim_business" ("business_id");
-
-ALTER TABLE "dim_tip" ADD FOREIGN KEY ("business_id") REFERENCES "dim_business" ("business_id");
-
-ALTER TABLE "dim_tip" ADD FOREIGN KEY ("user_id") REFERENCES "dim_user" ("user_id");
-
 
 -- STAGING ---
 
 CREATE TABLE IF NOT EXISTS staging_users
 (
-    user_id char(22),
-    average_stars real,
-    compliment_cool int4,
-    compliment_cute int4,
-    compliment_funny int4,
-    compliment_hot int4,
-    compliment_list int4,
-    compliment_more int4,
-    compliment_note int4,
-    compliment_photos int4,
-    compliment_plain int4,
+    user_id            char(22),
+    average_stars      real,
+    compliment_cool    int4,
+    compliment_cute    int4,
+    compliment_funny   int4,
+    compliment_hot     int4,
+    compliment_list    int4,
+    compliment_more    int4,
+    compliment_note    int4,
+    compliment_photos  int4,
+    compliment_plain   int4,
     compliment_profile int4,
-    compliment_writer int4,
-    cool int4,
-    elite text,
-    fans int4,
-    friends text,
-    funny int4,
-    name text,
-    review_count int4,
-    useful int4,
+    compliment_writer  int4,
+    cool               int4,
+    elite              text,
+    fans               int4,
+    friends            text,
+    funny              int4,
+    name               text,
+    review_count       int4,
+    useful             int4,
 --     TODO: Do we need timestamp or should I use date or int YYYYMMDD?
-    yelping_since timestamp
+    yelping_since      timestamp
 );
 
 CREATE TABLE IF NOT EXISTS staging_reviews
 (
-    review_id char(22),
-    user_id char(22),
+    review_id     char(22),
+    user_id       char(22),
     "business_id" char(22),
-    cool int4,
-    date timestamp,
-    funny int4,
-    stars real,
-    text varchar(5000),
-    useful int4
+    cool          int4,
+    date          timestamp,
+    funny         int4,
+    stars         real,
+    text          varchar(5000),
+    useful        int4
 );
 
 CREATE TABLE IF NOT EXISTS staging_businesses
 (
-    business_id char(22),
-    address text,
-    categories text,
-    city text,
-    is_open boolean,
+    business_id  char(22),
+    address      text,
+    categories   text,
+    city         text,
+    is_open      boolean,
 --     TODO: check if need to change
-    latitude double precision,
-    longitude double precision,
-    name text,
-    postal_code varchar(32),
+    latitude     double precision,
+    longitude    double precision,
+    name         text,
+    postal_code  varchar(32),
     review_count int4,
-    stars real,
-    state varchar(3)
+    stars        real,
+    state        varchar(3)
 );
+
+
+
 

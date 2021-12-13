@@ -22,7 +22,7 @@ USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_use
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
 S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
 
-enable_staging = False
+enable_staging = True
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -31,8 +31,6 @@ default_args = {
     # 'retries': 3,
     # 'retry_delay': timedelta(minutes=5),
     # 'email_on_retry': False,
-    'schedule_interval': None,
-    'catchup': False
 }
 
 
@@ -144,8 +142,8 @@ with DAG(DAG_NAME,
             TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
             TestCase("SELECT  COUNT(*)>0 FROM dim_tip", False),
             # TODO: what to do if this is continous pipeline? Should I calculate count beforehand?
-            TestCase(
-                "SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category) FROM staging_businesses s", True)
+            TestCase("""SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category)
+                     FROM staging_businesses s""", True)
         ],
         dag=dag
     )
