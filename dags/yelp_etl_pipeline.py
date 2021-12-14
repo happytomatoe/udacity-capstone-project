@@ -17,12 +17,14 @@ REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
 AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
 TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 
+S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
+
 BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
 USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
 CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "yelp_academic_dataset_checkin.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
-S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
+
 
 enable_staging = True
 
@@ -88,23 +90,6 @@ def create_staging_tasks():
             """),
         dag=dag
     )
-    stage_reviews = StageToRedshiftOperator(
-        task_id='stage_reviews',
-        s3_bucket=S3_BUCKET,
-        s3_key=REVIEWS_DATA_S3_KEY,
-        schema=TABLES_SCHEMA,
-        table="staging_reviews",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
-            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
-            TRUNCATECOLUMNS
-            BLANKSASNULL;
-            """),
-        dag=dag
-    )
     stage_tips = StageToRedshiftOperator(
         task_id='stage_tips',
         s3_bucket=S3_BUCKET,
@@ -123,7 +108,7 @@ def create_staging_tasks():
         dag=dag
     )
     stage_checkins = StageToRedshiftOperator(
-        task_id='stage_tips',
+        task_id='stage_checkins',
         s3_bucket=S3_BUCKET,
         s3_key=CHECK_IN_DATA_S3_KEY,
         schema=TABLES_SCHEMA,

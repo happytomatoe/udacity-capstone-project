@@ -1,17 +1,16 @@
 ----------------------------------------------------- ***DIMENSIONS*** ---
 
 
-CREATE TABLE IF NOT EXISTS "dim_date_time"
+CREATE TABLE IF NOT EXISTS "dim_date"
 (
-    date_time timestamp PRIMARY KEY,
-    date      date,
-    hour      int2,
-    minute    int2,
-    day       int2,
-    week      int2,
-    weekday   int2,
-    month     int2,
-    year      int2
+    date_key int4 PRIMARY KEY,
+    date     date,
+    day      int2,
+    week     int2,
+    weekday  int2,
+    month    int2,
+    quarter  int2,
+    year     int2
 );
 
 -- Date Key (PK)
@@ -55,7 +54,6 @@ CREATE TABLE IF NOT EXISTS "dim_business"
     "city"         text,
 --   TODO: check if there are many 3 char states
     "state"        varchar(3),
---   TODO: change
     "postal_code"  varchar(32),
     "latitude"     double precision,
     "longitude"    double precision,
