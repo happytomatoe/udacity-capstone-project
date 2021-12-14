@@ -20,6 +20,8 @@ TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
 USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
+CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "yelp_academic_dataset_checkin.json")
+TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
 
 enable_staging = True
@@ -35,7 +37,7 @@ default_args = {
 
 
 def create_staging_tasks():
-    stage_businesses_to_redshift = StageToRedshiftOperator(
+    stage_businesses = StageToRedshiftOperator(
         task_id='stage_businesses',
         s3_bucket=S3_BUCKET,
         s3_key=BUSINESS_DATA_S3_KEY,
@@ -52,7 +54,7 @@ def create_staging_tasks():
             """),
         dag=dag
     )
-    stage_users_to_redshift = StageToRedshiftOperator(
+    stage_users = StageToRedshiftOperator(
         task_id='stage_users',
         s3_bucket=S3_BUCKET,
         s3_key=USERS_DATA_S3_KEY,
@@ -69,7 +71,7 @@ def create_staging_tasks():
             """),
         dag=dag
     )
-    stage_reviews_to_redshift = StageToRedshiftOperator(
+    stage_reviews = StageToRedshiftOperator(
         task_id='stage_reviews',
         s3_bucket=S3_BUCKET,
         s3_key=REVIEWS_DATA_S3_KEY,
@@ -86,7 +88,58 @@ def create_staging_tasks():
             """),
         dag=dag
     )
-    return [stage_businesses_to_redshift, stage_reviews_to_redshift, stage_users_to_redshift]
+    stage_reviews = StageToRedshiftOperator(
+        task_id='stage_reviews',
+        s3_bucket=S3_BUCKET,
+        s3_key=REVIEWS_DATA_S3_KEY,
+        schema=TABLES_SCHEMA,
+        table="staging_reviews",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+        copy_options=dedent("""
+            COMPUPDATE OFF STATUPDATE OFF
+            FORMAT AS JSON 'auto ignorecase'
+            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
+            TRUNCATECOLUMNS
+            BLANKSASNULL;
+            """),
+        dag=dag
+    )
+    stage_tips = StageToRedshiftOperator(
+        task_id='stage_tips',
+        s3_bucket=S3_BUCKET,
+        s3_key=TIP_DATA_S3_KEY,
+        schema=TABLES_SCHEMA,
+        table="staging_tips",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+        copy_options=dedent("""
+            COMPUPDATE OFF STATUPDATE OFF
+            FORMAT AS JSON 'auto ignorecase'
+            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
+            TRUNCATECOLUMNS
+            BLANKSASNULL;
+            """),
+        dag=dag
+    )
+    stage_checkins = StageToRedshiftOperator(
+        task_id='stage_tips',
+        s3_bucket=S3_BUCKET,
+        s3_key=CHECK_IN_DATA_S3_KEY,
+        schema=TABLES_SCHEMA,
+        table="staging_checkins",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+        copy_options=dedent("""
+            COMPUPDATE OFF STATUPDATE OFF
+            FORMAT AS JSON 'auto ignorecase'
+            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
+            TRUNCATECOLUMNS
+            BLANKSASNULL;
+            """),
+        dag=dag
+    )
+    return [stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews]
 
 
 with DAG(DAG_NAME,
@@ -140,7 +193,7 @@ with DAG(DAG_NAME,
             TestCase("SELECT  COUNT(*)>0 FROM fact_review", True),
             TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
             TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
-            TestCase("SELECT  COUNT(*)>0 FROM dim_tip", False),
+            # TODO: add other fact tables
             # TODO: what to do if this is continous pipeline? Should I calculate count beforehand?
             TestCase("""SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category)
                      FROM staging_businesses s""", True)

@@ -40,7 +40,11 @@ class TableInsertQueries(object):
             select st_b.business_id, TRIM(SPLIT_PART(st_b.categories, ',', seq.num))
             from  seq_1_99 as seq
             inner join staging_businesses st_b ON seq.num <= REGEXP_COUNT(st_b.categories, ',') + 1
-            """
+            """,
+        'dim_date_time':"""
+            INSERT INTO dim_da()
+        
+        """
     }
 
     @staticmethod
