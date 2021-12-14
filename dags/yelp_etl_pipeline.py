@@ -25,8 +25,7 @@ REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset
 CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "yelp_academic_dataset_checkin.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 
-
-enable_staging = True
+enable_staging = False
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -127,6 +126,47 @@ def create_staging_tasks():
     return [stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews]
 
 
+def create_load_dimension_tasks():
+    load_user_dimension = LoadDimensionOperator(
+        task_id='load_user_dim_table',
+        table="dim_user",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        load_mode=DIMESIONS_LOAD_MODE,
+        dag=dag
+    )
+    load_business_dimension = LoadDimensionOperator(
+        task_id='load_business_dim_table',
+        table="dim_business",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        load_mode=DIMESIONS_LOAD_MODE,
+        dag=dag
+    )
+    return [load_user_dimension, load_business_dimension]
+
+
+def create_load_facts_tasks():
+    load_review_facts = LoadFactOperator(
+        task_id='load_review_fact_table',
+        table="fact_review",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        dag=dag
+    )
+    load_business_category_facts = LoadFactOperator(
+        task_id='load_business_category_fact_table',
+        table="fact_business_category",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        dag=dag
+    )
+    load_checkin_facts = LoadFactOperator(
+        task_id='load_check_in_fact_table',
+        table="fact_checkin",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        dag=dag
+    )
+
+    return [load_review_facts, load_business_category_facts, load_checkin_facts]
+
+
 with DAG(DAG_NAME,
          default_args=default_args,
          description='Load and transform data in Redshift with Airflow',
@@ -141,35 +181,8 @@ with DAG(DAG_NAME,
         sql="sql/create_schema.sql",
     )
 
-    load_user_dimension = LoadDimensionOperator(
-        task_id='load_user_dim_table',
-        table="dim_user",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        load_mode=DIMESIONS_LOAD_MODE,
-        dag=dag
-    )
-
-    load_business_dimension = LoadDimensionOperator(
-        task_id='load_business_dim_table',
-        table="dim_business",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        load_mode=DIMESIONS_LOAD_MODE,
-        dag=dag
-    )
-
-    load_review_fact = LoadFactOperator(
-        task_id='load_review_fact_table',
-        table="fact_review",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        dag=dag
-    )
-
-    load_business_category_fact = LoadFactOperator(
-        task_id='load_business_category_fact_table',
-        table="fact_business_category",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        dag=dag
-    )
+    load_dimensions = create_load_dimension_tasks()
+    load_facts = create_load_facts_tasks()
 
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
@@ -187,9 +200,6 @@ with DAG(DAG_NAME,
     )
 
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
-
-    load_dimensions = [load_user_dimension, load_business_dimension]
-    load_facts = [load_review_fact, load_business_category_fact]
 
     if enable_staging:
         staging_processes = create_staging_tasks()

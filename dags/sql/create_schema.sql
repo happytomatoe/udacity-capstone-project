@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS "dim_user"
 (
     "user_id"       char(22) PRIMARY KEY,
     "name"          text,
-    "yelping_since" timestamp references dim_date_time,
+    "yelping_since" timestamp,
+
 --   TODO: do we need review_count?
     "usefull"       int4,
     "funny"         int4,
@@ -107,7 +108,8 @@ CREATE TABLE IF NOT EXISTS fact_tip
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
     "business_id" char(22) references dim_business,
-    "date_id"     timestamp references dim_date_time
+    "timestamp"     timestamp
+--         references dim_date_time
 );
 
 ------------------------------------------------------------ STAGING ---
@@ -178,7 +180,7 @@ CREATE TABLE IF NOT EXISTS staging_businesses
 CREATE TABLE IF NOT EXISTS staging_checkins
 (
     business_id char(22),
-    date        varchar(5000)
+    date        varchar(max)
 );
 
 -- tips
@@ -193,7 +195,7 @@ CREATE TABLE IF NOT EXISTS staging_tips
     business_id      char(22),
     user_id          char(22),
     date             timestamp,
-    text             varchar(5000),
+    text             varchar(max),
     compliment_count int2
 );
 
