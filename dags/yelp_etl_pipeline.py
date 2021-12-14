@@ -22,7 +22,7 @@ S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
 BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
 USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
-CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "yelp_academic_dataset_checkin.json")
+CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 
 enable_staging = False
