@@ -1,4 +1,5 @@
 from datetime import datetime
+from textwrap import dedent
 
 from airflow import DAG
 from airflow.models import Variable
@@ -6,7 +7,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
 
 from helpers import TestCase
-from operators import DataQualityOperator
+from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
 
 DAG_NAME = 'yelp_etl_pipeline'
@@ -49,6 +50,20 @@ with DAG(DAG_NAME,
         postgres_conn_id=REDSHIFT_CONN_ID,
         sql="sql/create_schema.sql",
     )
+    populate_dim_date_if_empty = PopulateTableOperator(
+        task_id='populate_date_dimension_if_empty',
+        s3_bucket=S3_BUCKET,
+        s3_key="dim_date.csv",
+        schema=TABLES_SCHEMA,
+        table="dim_date",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+        copy_options=dedent("""
+            COMPUPDATE OFF STATUPDATE OFF
+            FORMAT AS CSV;
+            """),
+        dag=dag
+    )
 
     load_dimensions = create_load_dimension_tasks(dag)
     load_facts = create_load_facts_tasks(dag)
@@ -74,7 +89,7 @@ with DAG(DAG_NAME,
 
     if enable_staging:
         staging_processes = create_staging_tasks(dag)
-        start_operator >> create_tables_if_not_exist >> staging_processes
+        start_operator >> create_tables_if_not_exist >> populate_dim_date_if_empty >> staging_processes
 
         for p in staging_processes:
             p >> load_dimensions
@@ -85,7 +100,7 @@ with DAG(DAG_NAME,
         load_facts >> run_quality_checks >> end_operator
 
     else:
-        start_operator >> create_tables_if_not_exist >> load_dimensions
+        start_operator >> create_tables_if_not_exist >> populate_dim_date_if_empty >> load_dimensions
 
         for d in load_dimensions:
             d >> load_facts

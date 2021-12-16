@@ -21,20 +21,7 @@ TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.jso
 
 
 def create_staging_tasks(dag: DAG):
-    populate_dim_date_if_empty = PopulateTableOperator(
-        task_id='populate_date_dimension_if_empty',
-        s3_bucket=S3_BUCKET,
-        s3_key="dim_date.csv",
-        schema=TABLES_SCHEMA,
-        table="dim_date",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS CSV;
-            """),
-        dag=dag
-    )
+
     stage_businesses = StageToRedshiftOperator(
         task_id='stage_businesses',
         s3_bucket=S3_BUCKET,
@@ -120,7 +107,7 @@ def create_staging_tasks(dag: DAG):
             """),
         dag=dag
     )
-    return [populate_dim_date_if_empty, stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews]
+    return [stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews]
 
 
 def create_load_dimension_tasks(dag: DAG):
