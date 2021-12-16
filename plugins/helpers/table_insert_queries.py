@@ -68,28 +68,13 @@ class TableInsertQueries(object):
             """,
         'fact_checkin': """
         INSERT INTO fact_checkin(business_id, timestamp) 
-            -- https://stackoverflow.com/questions/22643338/sequence-number-generation-function-in-aws-redshift
-            with seq_0_9 as (
-            select 0 as num
-            union all
-            select 1 as num
-            union all select 2 as num
-            union all select 3 as num
-            union all select 4 as num
-            union all select 5 as num
-            union all select 6 as num
-            union all select 7 as num
-            union all select 8 as num
-            union all select 9 as num
-            ), seq_1_9999 AS (
-                select a.num + b.num * 10 + c.num * 100 + d.num * 1000 as num
-                from seq_0_9 a, seq_0_9 b, seq_0_9 c, seq_0_9 d
-                order by num offset  1
-            )
-            select st_c.business_id, TRIM(SPLIT_PART(st_c.date, ',', seq.num))::timestamp
-            from  seq_1_9999 as seq
-            inner join staging_checkins st_c ON seq.num <= REGEXP_COUNT(st_c.date, ',') + 1
-        """
+        SELECT business_id, date FROM staging_checkins
+        """,
+        'fact_tip': """
+            INSERT INTO fact_tip(user_id, business_id, text, compliment_count)  
+            SELECT user_id, business_id, text, compliment_count  FROM  staging_tips
+            """,
+
     }
 
     @staticmethod

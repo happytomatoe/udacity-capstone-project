@@ -22,6 +22,7 @@ S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
 BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
 USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
+# TODO: add step to compute next resource
 CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 
@@ -164,7 +165,14 @@ def create_load_facts_tasks():
         dag=dag
     )
 
-    return [load_review_facts, load_business_category_facts, load_checkin_facts]
+    load_tip_facts = LoadFactOperator(
+        task_id='load_tip_fact_table',
+        table="fact_tip",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        dag=dag
+    )
+
+    return [load_review_facts, load_business_category_facts, load_checkin_facts, load_tip_facts]
 
 
 with DAG(DAG_NAME,
@@ -183,12 +191,14 @@ with DAG(DAG_NAME,
 
     load_dimensions = create_load_dimension_tasks()
     load_facts = create_load_facts_tasks()
-
+    # TODO: add populate dates task
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
         redshift_conn_id=REDSHIFT_CONN_ID,
         test_cases=[
             TestCase("SELECT  COUNT(*)>0 FROM fact_review", True),
+            TestCase("SELECT  COUNT(*)>0 FROM fact_checkin", True),
+            TestCase("SELECT  COUNT(*)>0 FROM fact_tip", True),
             TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
             TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
             # TODO: add other fact tables

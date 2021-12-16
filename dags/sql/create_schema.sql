@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS staging_businesses
 CREATE TABLE IF NOT EXISTS staging_checkins
 (
     business_id char(22),
-    date        varchar(max)
+    date        timestamp
 );
 
 -- tips
