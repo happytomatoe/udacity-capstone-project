@@ -48,3 +48,5 @@ Criteria: has form of fact and dimensions tables
 
 TODO: 
 - https://stackoverflow.com/questions/38825836/write-spark-dataframe-to-postgres-database
+
+- add instruction to generate/upload dim_date.csv

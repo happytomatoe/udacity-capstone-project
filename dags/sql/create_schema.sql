@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "dim_date"
 CREATE TABLE IF NOT EXISTS "dim_user"
 (
     "user_id"       char(22) PRIMARY KEY,
-    "name"          text,
+    "name"          text NOT NULL,
     "yelping_since" timestamp,
 
 --   TODO: do we need review_count?
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "dim_user"
 CREATE TABLE IF NOT EXISTS "dim_business"
 (
     "business_id"  char(22) PRIMARY KEY,
-    "name"         text,
+    "name"         text NOT NULL,
     "address"      text,
     "city"         text,
 --   TODO: check if there are many 3 char states
@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS "dim_business"
 CREATE TABLE IF NOT EXISTS "fact_review"
 (
     "review_id"   char(22) PRIMARY KEY,
-    "user_id"     char(22) references dim_user,
-    "business_id" char(22) references dim_business,
+    "user_id"     char(22) references dim_user NOT NULL,
+    "business_id" char(22) references dim_business NOT NULL,
     "stars"       int2,
     "date"        date,
-    "text"        varchar(5000),
+    "text"        varchar(5000) NOT NULL,
     "usefull"     int4,
     "funny"       int4,
     "cool"        int4
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS "fact_review"
 -- TODO: do I need spark for this?
 CREATE TABLE IF NOT EXISTS "fact_business_category"
 (
-    "category"    text,
-    "business_id" char(22) references dim_business
+    "category"    text NOT NULL,
+    "business_id" char(22) references dim_business NOT NULL
 );
 
 -- tips
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS fact_tip
 
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
-    "business_id" char(22) references dim_business,
+    "business_id" char(22) references dim_business NOT NULL ,
     "timestamp"     timestamp
 --         references dim_date_time
 );

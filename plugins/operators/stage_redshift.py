@@ -69,7 +69,7 @@ class StageToRedshiftOperator(BaseOperator):
                                                                         access_key=aws_connection.login,
                                                                         secret_key=aws_connection.password,
                                                                         copy_options=self.copy_options)
-
+        # TODO: delete later
         redshift_hook.run(f"TRUNCATE TABLE {self.schema}.{self.table}", True)
 
         redshift_hook.run(copy_query, autocommit=True)

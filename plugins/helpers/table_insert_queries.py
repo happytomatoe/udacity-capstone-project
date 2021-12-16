@@ -12,30 +12,6 @@ class TableInsertQueries(object):
                SELECT  business_id, name, address, city, state, postal_code, latitude, longitude, stars, review_count, is_open
                  FROM staging_businesses
            """,
-        'dim_date_time': """
-            INSERT INTO dim_date(date_key, date, day, week, weekday, month, year)
-            SELECT DISTINCT date_part('year', yelping_since) * 10000 +
-                            date_part('month', yelping_since) * 100 +
-                            date_part('day', yelping_since),
-                            trunc(yelping_since),
-                            extract(day from yelping_since),
-                            extract(week from yelping_since),
-                            extract(weekday from yelping_since),
-                            extract(month from yelping_since),
-                            extract(year from yelping_since)
-            FROM staging_users
-            UNION
-            SELECT date_part('year', date) * 10000 +
-                   date_part('month', date) * 100 +
-                   date_part('day', date),
-                   trunc(date),
-                   extract(day from date),
-                   extract(week from date),
-                   extract(weekday from date),
-                   extract(month from date),
-                   extract(year from date)
-            From staging_reviews
-    """,
         'fact_review': """
              INSERT INTO fact_review(review_id, user_id, business_id, stars, date, text, usefull, funny, cool)
                 SELECT

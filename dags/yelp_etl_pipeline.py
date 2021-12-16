@@ -1,14 +1,13 @@
 from datetime import datetime
-from textwrap import dedent
 
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators import (LoadFactOperator, LoadDimensionOperator, DataQualityOperator)
-from airflow.operators import StageToRedshiftOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
 
 from helpers import TestCase
+from operators import DataQualityOperator
+from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
 
 DAG_NAME = 'yelp_etl_pipeline'
 
@@ -26,7 +25,7 @@ REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset
 CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 
-enable_staging = False
+enable_staging = True
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -36,144 +35,6 @@ default_args = {
     # 'retry_delay': timedelta(minutes=5),
     # 'email_on_retry': False,
 }
-
-
-def create_staging_tasks():
-    stage_businesses = StageToRedshiftOperator(
-        task_id='stage_businesses',
-        s3_bucket=S3_BUCKET,
-        s3_key=BUSINESS_DATA_S3_KEY,
-        schema=TABLES_SCHEMA,
-        table="staging_businesses",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
-            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
-            TRUNCATECOLUMNS
-            BLANKSASNULL;
-            """),
-        dag=dag
-    )
-    stage_users = StageToRedshiftOperator(
-        task_id='stage_users',
-        s3_bucket=S3_BUCKET,
-        s3_key=USERS_DATA_S3_KEY,
-        schema=TABLES_SCHEMA,
-        table="staging_users",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
-            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
-            TRUNCATECOLUMNS
-            BLANKSASNULL;
-            """),
-        dag=dag
-    )
-    stage_reviews = StageToRedshiftOperator(
-        task_id='stage_reviews',
-        s3_bucket=S3_BUCKET,
-        s3_key=REVIEWS_DATA_S3_KEY,
-        schema=TABLES_SCHEMA,
-        table="staging_reviews",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
-            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
-            TRUNCATECOLUMNS
-            BLANKSASNULL;
-            """),
-        dag=dag
-    )
-    stage_tips = StageToRedshiftOperator(
-        task_id='stage_tips',
-        s3_bucket=S3_BUCKET,
-        s3_key=TIP_DATA_S3_KEY,
-        schema=TABLES_SCHEMA,
-        table="staging_tips",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
-            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
-            TRUNCATECOLUMNS
-            BLANKSASNULL;
-            """),
-        dag=dag
-    )
-    stage_checkins = StageToRedshiftOperator(
-        task_id='stage_checkins',
-        s3_bucket=S3_BUCKET,
-        s3_key=CHECK_IN_DATA_S3_KEY,
-        schema=TABLES_SCHEMA,
-        table="staging_checkins",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        copy_options=dedent("""
-            COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
-            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
-            TRUNCATECOLUMNS
-            BLANKSASNULL;
-            """),
-        dag=dag
-    )
-    return [stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews]
-
-
-def create_load_dimension_tasks():
-    load_user_dimension = LoadDimensionOperator(
-        task_id='load_user_dim_table',
-        table="dim_user",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        load_mode=DIMESIONS_LOAD_MODE,
-        dag=dag
-    )
-    load_business_dimension = LoadDimensionOperator(
-        task_id='load_business_dim_table',
-        table="dim_business",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        load_mode=DIMESIONS_LOAD_MODE,
-        dag=dag
-    )
-    return [load_user_dimension, load_business_dimension]
-
-
-def create_load_facts_tasks():
-    load_review_facts = LoadFactOperator(
-        task_id='load_review_fact_table',
-        table="fact_review",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        dag=dag
-    )
-    load_business_category_facts = LoadFactOperator(
-        task_id='load_business_category_fact_table',
-        table="fact_business_category",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        dag=dag
-    )
-    load_checkin_facts = LoadFactOperator(
-        task_id='load_check_in_fact_table',
-        table="fact_checkin",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        dag=dag
-    )
-
-    load_tip_facts = LoadFactOperator(
-        task_id='load_tip_fact_table',
-        table="fact_tip",
-        redshift_conn_id=REDSHIFT_CONN_ID,
-        dag=dag
-    )
-
-    return [load_review_facts, load_business_category_facts, load_checkin_facts, load_tip_facts]
-
 
 with DAG(DAG_NAME,
          default_args=default_args,
@@ -189,9 +50,9 @@ with DAG(DAG_NAME,
         sql="sql/create_schema.sql",
     )
 
-    load_dimensions = create_load_dimension_tasks()
-    load_facts = create_load_facts_tasks()
-    # TODO: add populate dates task
+    load_dimensions = create_load_dimension_tasks(dag)
+    load_facts = create_load_facts_tasks(dag)
+
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
         redshift_conn_id=REDSHIFT_CONN_ID,
@@ -212,7 +73,7 @@ with DAG(DAG_NAME,
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
     if enable_staging:
-        staging_processes = create_staging_tasks()
+        staging_processes = create_staging_tasks(dag)
         start_operator >> create_tables_if_not_exist >> staging_processes
 
         for p in staging_processes:
@@ -230,3 +91,4 @@ with DAG(DAG_NAME,
             d >> load_facts
 
         load_facts >> run_quality_checks >> end_operator
+
