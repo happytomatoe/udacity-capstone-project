@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "dim_user"
     "name"                  text NOT NULL,
     "yelping_since"         timestamp,
     "yelping_since_date_id" int4 references dim_date,
---   TODO: do we need review_count?
+    review_count            int4,
     "usefull"               int4,
     "funny"                 int4,
     "cool"                  int4,
@@ -46,14 +46,13 @@ CREATE TABLE IF NOT EXISTS "dim_user"
     "avg_stars"             int4
 );
 
--- FIXME: lat, lon converted to int
 CREATE TABLE IF NOT EXISTS "dim_business"
 (
     "business_id"  char(22) PRIMARY KEY,
     "name"         text NOT NULL,
     "address"      text,
     "city"         text,
---   TODO: check if there are many 3 char states
+--     TODO: what to do with 3 char wrong province?
     "state"        varchar(3),
     "postal_code"  varchar(32),
     "latitude"     double precision,
@@ -74,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "fact_review"
     "review_id"   char(22) PRIMARY KEY,
     "user_id"     char(22) references dim_user     NOT NULL,
     "business_id" char(22) references dim_business NOT NULL,
-    "stars"       int2,
+    "stars"       int2                             NOT NULL,
     "date_id"     int4 references dim_date         NOT NULL,
     "text"        varchar(5000)                    NOT NULL,
     "usefull"     int4,
@@ -115,30 +114,44 @@ CREATE TABLE IF NOT EXISTS "fact_checkin"
 
 CREATE TABLE IF NOT EXISTS staging_users
 (
-    user_id            char(22),
-    average_stars      real,
-    compliment_cool    int4,
-    compliment_cute    int4,
-    compliment_funny   int4,
-    compliment_hot     int4,
-    compliment_list    int4,
-    compliment_more    int4,
-    compliment_note    int4,
-    compliment_photos  int4,
-    compliment_plain   int4,
-    compliment_profile int4,
-    compliment_writer  int4,
-    cool               int4,
-    elite              text,
-    fans               int4,
-    friends            text,
-    funny              int4,
-    name               text,
-    review_count       int4,
-    useful             int4,
---     TODO: Do we need timestamp or should I use date or int YYYYMMDD?
-    yelping_since      timestamp
+    user_id       char(22),
+    average_stars real,
+--     compliment_cool    int4,
+--     compliment_cute    int4,
+--     compliment_funny   int4,
+--     compliment_hot     int4,
+--     compliment_list    int4,
+--     compliment_more    int4,
+--     compliment_note    int4,
+--     compliment_photos  int4,
+--     compliment_plain   int4,
+--     compliment_profile int4,
+--     compliment_writer  int4,
+    cool          int4,
+--     elite              text,
+    fans          int4,
+--     TODO: do we need to add friends?
+--     friends            text,
+    funny         int4,
+    name          text,
+    review_count  int4,
+    useful        int4,
+    yelping_since timestamp
 );
+
+-- CREATE TABLE IF NOT EXISTS "dim_user"
+-- (
+--     "user_id"               char(22) PRIMARY KEY,
+--     "name"                  text NOT NULL,
+--     "yelping_since"         timestamp,
+--     "yelping_since_date_id" int4 references dim_date,
+--     review_count            int4,
+--     "usefull"               int4,
+--     "funny"                 int4,
+--     "cool"                  int4,
+--     "fans"                  int4,
+--     "avg_stars"             int4
+-- );
 
 CREATE TABLE IF NOT EXISTS staging_reviews
 (

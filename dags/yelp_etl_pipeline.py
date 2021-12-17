@@ -68,20 +68,33 @@ with DAG(DAG_NAME,
     load_dimensions = create_load_dimension_tasks(dag)
     load_facts = create_load_facts_tasks(dag)
 
+    test_cases = [
+        TestCase("SELECT  COUNT(*)>0 FROM fact_review", True),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_checkin", True),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_tip", True),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_business_category", True),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE name is null or name = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE user_id is null or user_id = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE business_id is null or business_id = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE name is null or name = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE name is null or name = ''", False),
+
+        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE review_id is null or review_id = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE user_id is null or user_id = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE business_id is null or stars = '' or stars<0 or stars>5", False),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE text is null or text = ''", False),
+
+        # TODO: add other fact tables
+        # TODO: what to do if this is continous pipeline? Should I calculate count beforehand?
+        # TestCase("""SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category)
+        #              FROM staging_businesses s""", True)
+    ]
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
         redshift_conn_id=REDSHIFT_CONN_ID,
-        test_cases=[
-            TestCase("SELECT  COUNT(*)>0 FROM fact_review", True),
-            TestCase("SELECT  COUNT(*)>0 FROM fact_checkin", True),
-            TestCase("SELECT  COUNT(*)>0 FROM fact_tip", True),
-            TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
-            TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
-            # TODO: add other fact tables
-            # TODO: what to do if this is continous pipeline? Should I calculate count beforehand?
-            TestCase("""SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category)
-                     FROM staging_businesses s""", True)
-        ],
+        test_cases=test_cases,
         dag=dag
     )
 
@@ -106,4 +119,3 @@ with DAG(DAG_NAME,
             d >> load_facts
 
         load_facts >> run_quality_checks >> end_operator
-
