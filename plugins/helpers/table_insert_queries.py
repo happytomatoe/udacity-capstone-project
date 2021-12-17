@@ -2,9 +2,10 @@
 class TableInsertQueries(object):
     __dict = {
         'dim_user': """
-         INSERT INTO dim_user(user_id, name, yelping_since, usefull, funny, cool, fans, avg_stars) 
+         INSERT INTO dim_user(user_id, name, yelping_since, yelping_since_date_id,  usefull, funny, cool, fans, avg_stars) 
             SELECT 
-              user_id, name,  yelping_since::date, useful, funny, cool, fans, average_stars
+              user_id, name,  yelping_since::date, date_part('year', yelping_since) * 10000 + 
+              date_part('month', yelping_since) * 100 + date_part('day', yelping_since), useful, funny, cool, fans, average_stars
          FROM staging_users
     """,
         'dim_business': """
@@ -13,9 +14,9 @@ class TableInsertQueries(object):
                  FROM staging_businesses
            """,
         'fact_review': """
-             INSERT INTO fact_review(review_id, user_id, business_id, stars, date, text, usefull, funny, cool)
+             INSERT INTO fact_review(review_id, user_id, business_id, stars, date_id, text, usefull, funny, cool)
                 SELECT
-                  review_id, user_id, business_id, stars, date, text, useful, funny, cool
+                  review_id, user_id, business_id, stars, date_part('year', date) * 10000 + date_part('month', date) * 100 + date_part('day', date), text, useful, funny, cool
                   FROM staging_reviews
             """,
         'fact_business_category': """
@@ -43,8 +44,8 @@ class TableInsertQueries(object):
             inner join staging_businesses st_b ON seq.num <= REGEXP_COUNT(st_b.categories, ',') + 1
             """,
         'fact_checkin': """
-        INSERT INTO fact_checkin(business_id, timestamp) 
-        SELECT business_id, date FROM staging_checkins
+            INSERT INTO fact_checkin(business_id, timestamp, date_id) 
+            SELECT business_id, date, date_part('year', date) * 10000 + date_part('month', date) * 100 + date_part('day', date) FROM staging_checkins
         """,
         'fact_tip': """
             INSERT INTO fact_tip(user_id, business_id, text, compliment_count)  

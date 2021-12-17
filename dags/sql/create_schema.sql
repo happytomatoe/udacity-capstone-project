@@ -3,14 +3,14 @@
 
 CREATE TABLE IF NOT EXISTS "dim_date"
 (
-    date_key int4 PRIMARY KEY,
-    date     date,
-    day      int2,
-    week     int2,
-    weekday  int2,
-    month    int2,
-    quarter  int2,
-    year     int2
+    date_id int4 PRIMARY KEY,
+    date    date,
+    day     int2,
+    week    int2,
+    weekday int2,
+    month   int2,
+    quarter int2,
+    year    int2
 );
 
 -- Date Key (PK)
@@ -34,16 +34,16 @@ CREATE TABLE IF NOT EXISTS "dim_date"
 
 CREATE TABLE IF NOT EXISTS "dim_user"
 (
-    "user_id"       char(22) PRIMARY KEY,
-    "name"          text NOT NULL,
-    "yelping_since" timestamp,
-
+    "user_id"               char(22) PRIMARY KEY,
+    "name"                  text NOT NULL,
+    "yelping_since"         timestamp,
+    "yelping_since_date_id" int4 references dim_date,
 --   TODO: do we need review_count?
-    "usefull"       int4,
-    "funny"         int4,
-    "cool"          int4,
-    "fans"          int4,
-    "avg_stars"     int4
+    "usefull"               int4,
+    "funny"                 int4,
+    "cool"                  int4,
+    "fans"                  int4,
+    "avg_stars"             int4
 );
 
 -- FIXME: lat, lon converted to int
@@ -72,21 +72,20 @@ CREATE TABLE IF NOT EXISTS "dim_business"
 CREATE TABLE IF NOT EXISTS "fact_review"
 (
     "review_id"   char(22) PRIMARY KEY,
-    "user_id"     char(22) references dim_user NOT NULL,
+    "user_id"     char(22) references dim_user     NOT NULL,
     "business_id" char(22) references dim_business NOT NULL,
     "stars"       int2,
-    "date"        date,
-    "text"        varchar(5000) NOT NULL,
+    "date_id"     int4 references dim_date         NOT NULL,
+    "text"        varchar(5000)                    NOT NULL,
     "usefull"     int4,
     "funny"       int4,
     "cool"        int4
 );
 
 
--- TODO: do I need spark for this?
 CREATE TABLE IF NOT EXISTS "fact_business_category"
 (
-    "category"    text NOT NULL,
+    "category"    text                             NOT NULL,
     "business_id" char(22) references dim_business NOT NULL
 );
 
@@ -107,9 +106,9 @@ CREATE TABLE IF NOT EXISTS fact_tip
 
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
-    "business_id" char(22) references dim_business NOT NULL ,
-    "timestamp"     timestamp
---         references dim_date_time
+    "business_id" char(22) references dim_business NOT NULL,
+    "timestamp"   timestamp,
+    "date_id"     int4 references dim_date
 );
 
 ------------------------------------------------------------ STAGING ---

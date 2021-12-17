@@ -26,7 +26,7 @@ REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset
 CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 
-enable_staging = True
+enable_staging = False
 
 default_args = {
     'owner': 'Roman Lukash',

@@ -88,7 +88,7 @@ jupyter-install: venv
 )
 
 run: jupyter-install
-	 $(VENV_ACTIVATE); jupyter notebook
+	 $(VENV_ACTIVATE); jupyter notebook dwh/'IAC Redshift.ipynb'
 # 'Capstone Project Yelp.ipynb';
 
 doc: venv
