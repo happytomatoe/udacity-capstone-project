@@ -1,6 +1,9 @@
 # Yelp ETL Pipeline
 
 # Description
+![img.png](docs/yelp-logo.png)
+
+In this project the goal is to build data warehouse that later can be used for EDA. As for EDA you don't know 
 
 
 # Data Source
@@ -15,21 +18,16 @@ In the most recent dataset you'll find information about businesses across 8 met
 # Architecture
 
 
+# ETL flow
+
 ## Project structure
 
 
-## Database schema
+## Data warehouse schema
 
 
 #   Instructions
 
-## Step 1: Scope the Project and Gather Data
-Since the scope of the project will be highly dependent on the data, these two things happen simultaneously. In this step, you’ll:
-
-Identify and gather the data you'll be using for your project (at least two sources and more than 1 million rows).
-See Project Resources for ideas of what data you can use.
-Explain what end use cases you'd like to prepare the data for (e.g., analytics table, 
-app back-end, source-of-truth database, etc.)
 
 ## Step 2: Explore and Assess the Data
 Explore the data to identify data quality issues, like missing values, duplicate data, etc.
@@ -62,3 +60,5 @@ Post your write-up and final data model in a GitHub repo.
  
 TODO: 
 - add instruction to generate/upload dim_date.csv
+- add data dictionary
+- 
