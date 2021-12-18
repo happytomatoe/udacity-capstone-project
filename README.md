@@ -26,7 +26,7 @@ In the most recent dataset you'll find information about businesses across 8 met
 ## Data warehouse schema
 
 
-#   Instructions
+# Instructions
 
 
 ## Step 2: Explore and Assess the Data
@@ -61,4 +61,19 @@ Post your write-up and final data model in a GitHub repo.
 TODO: 
 - add instruction to generate/upload dim_date.csv
 - add data dictionary
-- 
+- add spark pipeline to transform checkins as the json contains lists 
+- add friends fact table
+
+
+# How to setup project
+1) Add airflow connections with following connection names:
+   1) aws_credentials. Connection type - Amazon Web Services, Login= aws_access_key,
+   Password - aws_secret_key. Set the region name in the "Extra" field(used by spark) 
+   ```json
+    {
+    "region_name": "us-east-1"
+   }   
+    ```
+   2) emr_credentials. Just copy aws_credentials with extra field.
+   3) redshift. Select connection type - Postgres 
+2) 

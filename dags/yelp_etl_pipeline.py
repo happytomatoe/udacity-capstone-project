@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from textwrap import dedent
 
@@ -10,7 +11,7 @@ from helpers import TestCase
 from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
 
-DAG_NAME = 'yelp_etl_pipeline'
+DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
 DIMESIONS_LOAD_MODE = Variable.get("dimenions_load_mode", "delete-load")
 REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
@@ -19,14 +20,15 @@ TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 
 S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
 
-BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
-USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
-REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
+BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "data/yelp_academic_dataset_business.json")
+USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "data/yelp_academic_dataset_user.json")
+REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_dataset_review.json")
+TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
+
 # TODO: add step to compute next resource
 CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
-TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
 
-enable_staging = False
+enable_staging = True
 
 default_args = {
     'owner': 'Roman Lukash',

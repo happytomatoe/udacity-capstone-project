@@ -74,9 +74,9 @@ CREATE TABLE IF NOT EXISTS "fact_business_category"
 
 CREATE TABLE IF NOT EXISTS fact_tip
 (
-    user_id          char(22) references dim_user NOT NULL,
+    user_id          char(22) references dim_user     NOT NULL,
     business_id      char(22) references dim_business NOT NULL,
-    text             varchar(5000) NOT NULL,
+    text             varchar(5000)                    NOT NULL,
     compliment_count int2
 );
 
@@ -87,9 +87,17 @@ CREATE TABLE IF NOT EXISTS fact_tip
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
     "business_id" char(22) references dim_business NOT NULL,
-    "timestamp"   timestamp NOT NULL sortkey,
+    "timestamp"   timestamp                        NOT NULL sortkey,
     "date_id"     int4 references dim_date
 );
+
+
+CREATE TABLE IF NOT EXISTS "fact_friend"
+(
+    "user_id"   char(22) references dim_user NOT NULL,
+    "friend_id" char(22) references dim_user NOT NULL
+);
+
 
 ------------------------------------------------------------ STAGING ---
 
@@ -101,7 +109,7 @@ CREATE TABLE IF NOT EXISTS staging_users
 --     elite              text,
     fans          int4,
 --     TODO: do we need to add friends?
---     friends            text,
+    friends       text,
     funny         int4,
     name          text,
     review_count  int4,
@@ -167,4 +175,10 @@ CREATE TABLE IF NOT EXISTS staging_tips
     compliment_count int2
 );
 
+
+CREATE TABLE IF NOT EXISTS staging_friends
+(
+    user_id   char(22),
+    friend_id char(22)
+);
 
