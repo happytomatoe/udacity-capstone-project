@@ -50,7 +50,8 @@ with DAG(DAG_NAME,
         postgres_conn_id=REDSHIFT_CONN_ID,
         sql="sql/create_schema.sql",
     )
-    populate_dim_date_if_empty = PopulateTableOperator(
+
+    populate_date_dimension_if_empty = PopulateTableOperator(
         task_id='populate_date_dimension_if_empty',
         s3_bucket=S3_BUCKET,
         s3_key="dim_date.csv",
@@ -115,7 +116,7 @@ with DAG(DAG_NAME,
 
     if enable_staging:
         staging_processes = create_staging_tasks(dag)
-        start_operator >> create_tables_if_not_exist >> populate_dim_date_if_empty >> staging_processes
+        start_operator >> create_tables_if_not_exist >> populate_date_dimension_if_empty >> staging_processes
 
         for p in staging_processes:
             p >> load_dimensions
@@ -126,7 +127,7 @@ with DAG(DAG_NAME,
         load_facts >> run_quality_checks >> end_operator
 
     else:
-        start_operator >> create_tables_if_not_exist >> populate_dim_date_if_empty >> load_dimensions
+        start_operator >> create_tables_if_not_exist >> populate_date_dimension_if_empty >> load_dimensions
 
         for d in load_dimensions:
             d >> load_facts
