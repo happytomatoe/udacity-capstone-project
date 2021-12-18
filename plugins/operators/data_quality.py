@@ -29,17 +29,22 @@ class DataQualityOperator(BaseOperator):
 
     def test(self, sql: str, expected_value):
         redshift_hook = PostgresHook(postgres_conn_id=self.redshift_conn_id)
-        records = redshift_hook.get_records(sql)
-        if len(records) < 1 or len(records[0]) < 1:
-            raise ValueError(
-                f"Data quality check failed. Query returned no results. Query '{sql}'")
+        try:
+            records = redshift_hook.get_first(sql)
+        except Exception:
+            self.log.info(f"Something went wrong when running '{sql}'")
+            raise
 
-        actual_value = records[0][0]
+        if len(records) < 1:
+            raise ValueError(f"Data quality check failed. Query returned no results. Query '{sql}'")
+
+        actual_value = records[0]
 
         if actual_value != expected_value:
             raise ValueError(
                 f"""Data quality check failed. Expected value {expected_value}
-                ({type(expected_value)}) doesn't match actual value {actual_value}
-                ({type(actual_value)}). Query '{sql}'
-                """)
+                          ({type(expected_value)}) doesn't match actual value {actual_value}
+                          ({type(actual_value)}). Query '{sql}'
+                          """)
         self.log.info(f"Data quality check passed. Query '{sql}' \n returned {actual_value}")
+

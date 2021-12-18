@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS "dim_date"
 (
-    date_id int4 PRIMARY KEY,
+    date_id int4 PRIMARY KEY distkey sortkey,
     date    date,
     day     int2,
     week    int2,
@@ -13,28 +13,9 @@ CREATE TABLE IF NOT EXISTS "dim_date"
     year    int2
 );
 
--- Date Key (PK)
--- Date
--- Full Date Description
--- Day of Week
--- Day Number in Calendar Month
--- Day Number in Calendar Year
--- Calendar Week Ending Date
--- Calendar Week Number in Year
--- Calendar Month Name
--- Calendar Month Number in Year
--- Calendar Year-Month (YYYY-MM)
--- Calendar Quarter
--- Calendar Year-Quarter
--- Calendar Year
--- Holiday Indicator
--- Weekday Indicator
--- SQL Date Stamp
-
-
 CREATE TABLE IF NOT EXISTS "dim_user"
 (
-    "user_id"               char(22) PRIMARY KEY,
+    "user_id"               char(22) PRIMARY KEY distkey sortkey,
     "name"                  text NOT NULL,
     "yelping_since"         timestamp,
     "yelping_since_date_id" int4 references dim_date,
@@ -48,29 +29,28 @@ CREATE TABLE IF NOT EXISTS "dim_user"
 
 CREATE TABLE IF NOT EXISTS "dim_business"
 (
-    "business_id"  char(22) PRIMARY KEY,
+    "business_id"  char(22) PRIMARY KEY distkey sortkey,
     "name"         text NOT NULL,
     "address"      text,
     "city"         text,
 --     TODO: what to do with 3 char wrong province?
     "state"        varchar(3),
     "postal_code"  varchar(32),
+--     TODO: this dimension missing country
     "latitude"     double precision,
     "longitude"    double precision,
     "stars"        real,
     "review_count" int4,
     "is_open"      boolean
 );
+-- TODO: should I add interleaved sort key?
 
 
 -- ------------------------------------------------------FACTS ---
 
--- TODO: add surogate keys?
--- TODO: add ids to fact tables?
-
 CREATE TABLE IF NOT EXISTS "fact_review"
 (
-    "review_id"   char(22) PRIMARY KEY,
+    "review_id"   char(22) PRIMARY KEY distkey,
     "user_id"     char(22) references dim_user     NOT NULL,
     "business_id" char(22) references dim_business NOT NULL,
     "stars"       int2                             NOT NULL,
@@ -79,23 +59,24 @@ CREATE TABLE IF NOT EXISTS "fact_review"
     "usefull"     int4,
     "funny"       int4,
     "cool"        int4
-);
+) INTERLEAVED SORTKEY (review_id,user_id,business_id,date_id);
 
 
 CREATE TABLE IF NOT EXISTS "fact_business_category"
 (
     "category"    text                             NOT NULL,
-    "business_id" char(22) references dim_business NOT NULL
+    "business_id" char(22) references dim_business NOT NULL distkey
 );
+-- TODO: should I add interleaved sort key?
 
 -- tips
 -- {"user_id":"sNVpZLDSlCudlXLsnJpg7A","business_id":"Wqetc51pFQzz04SXh_AORA","text":"So busy...","date":"2014-06-07 12:09:55","compliment_count":0}
 
 CREATE TABLE IF NOT EXISTS fact_tip
 (
-    user_id          char(22) references dim_user,
-    business_id      char(22) references dim_business,
-    text             varchar(5000),
+    user_id          char(22) references dim_user NOT NULL,
+    business_id      char(22) references dim_business NOT NULL,
+    text             varchar(5000) NOT NULL,
     compliment_count int2
 );
 
@@ -106,7 +87,7 @@ CREATE TABLE IF NOT EXISTS fact_tip
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
     "business_id" char(22) references dim_business NOT NULL,
-    "timestamp"   timestamp,
+    "timestamp"   timestamp NOT NULL sortkey,
     "date_id"     int4 references dim_date
 );
 
@@ -116,17 +97,6 @@ CREATE TABLE IF NOT EXISTS staging_users
 (
     user_id       char(22),
     average_stars real,
---     compliment_cool    int4,
---     compliment_cute    int4,
---     compliment_funny   int4,
---     compliment_hot     int4,
---     compliment_list    int4,
---     compliment_more    int4,
---     compliment_note    int4,
---     compliment_photos  int4,
---     compliment_plain   int4,
---     compliment_profile int4,
---     compliment_writer  int4,
     cool          int4,
 --     elite              text,
     fans          int4,
@@ -138,20 +108,6 @@ CREATE TABLE IF NOT EXISTS staging_users
     useful        int4,
     yelping_since timestamp
 );
-
--- CREATE TABLE IF NOT EXISTS "dim_user"
--- (
---     "user_id"               char(22) PRIMARY KEY,
---     "name"                  text NOT NULL,
---     "yelping_since"         timestamp,
---     "yelping_since_date_id" int4 references dim_date,
---     review_count            int4,
---     "usefull"               int4,
---     "funny"                 int4,
---     "cool"                  int4,
---     "fans"                  int4,
---     "avg_stars"             int4
--- );
 
 CREATE TABLE IF NOT EXISTS staging_reviews
 (
