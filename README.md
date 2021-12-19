@@ -3,7 +3,7 @@
 # Description
 ![img.png](docs/yelp-logo.png)
 
-In this project the goal is to build data warehouse that later can be used for EDA. As for EDA you don't know 
+In this project the goal is to build data warehouse tables that later can be used for EDA.  
 
 
 # Data Source
@@ -66,8 +66,6 @@ Post your write-up and final data model in a GitHub repo.
 TODO: 
 - add instruction to generate/upload dim_date.csv
 - add data dictionary
-- add spark pipeline to transform checkins as the json contains lists 
-- add friends fact table
 
 
 # How to setup project
