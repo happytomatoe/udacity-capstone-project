@@ -27,7 +27,7 @@ USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "data/yelp_academic_datase
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_dataset_review.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
 
-enable_staging = True
+enable_staging = False
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -43,7 +43,7 @@ with DAG(DAG_NAME,
          description='Load and transform data in Redshift with Airflow',
          catchup=False,
          schedule_interval=None,
-         max_active_runs=1,
+         # max_active_runs=1,
          ) as dag:
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 

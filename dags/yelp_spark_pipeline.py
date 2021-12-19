@@ -14,6 +14,8 @@ from airflow.operators.dummy_operator import DummyOperator
 
 from operators.emr_get_or_create_job_flow_operator import EmrGetOrCreateJobFlowOperator
 
+CLUSTER_NAME = "Yelp ETL"
+
 terminate_cluster = False
 
 EMR_CREDENTIALS_CONN_ID = "emr_credentials"
@@ -48,7 +50,7 @@ SPARK_STEPS = [
 ]
 
 JOB_FLOW_OVERRIDES = {
-    "Name": "Yelp ETL",
+    "Name": CLUSTER_NAME,
     "ReleaseLabel": "emr-6.5.0",
     'LogUri': 's3n://aws-logs-508278446598-eu-north-1/',
     "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}],
@@ -57,7 +59,8 @@ JOB_FLOW_OVERRIDES = {
             "Classification": "yarn-site",
             "Properties": {
                 "yarn.nodemanager.vmem-check-enabled": "false",
-                "yarn.nodemanager.pmem-check-enabled": "false"
+                "yarn.nodemanager.pmem-check-enabled": "false",
+                "yarn.nodemanager.resource.memory-mb": "15G"
             }
         },
         {
@@ -71,8 +74,8 @@ JOB_FLOW_OVERRIDES = {
             "Properties": {
                 "spark.dynamicAllocation.enabled": "false",
                 "spark.sql.adaptive.enabled": "true",
-                "spark.driver.memory": "13G",
-                "spark.executor.memory": "13G",
+                "spark.driver.memory": "12288M",
+                "spark.executor.memory": "12288M",
                 "spark.executor.cores": "3",
                 "spark.executor.instances": "2",
                 "spark.executor.memoryOverhead": "1331M",
@@ -95,22 +98,10 @@ JOB_FLOW_OVERRIDES = {
             }
         },
         {
-            "Classification": "hadoop-env",
-            "Configurations": [{
-                "Classification": "export",
-                "Configurations": [],
-                "Properties": {
-                    "JAVA_HOME": "/usr/lib/jvm/java-1.8.0"
-                }
-            }],
-            "Properties": {}
-        },
-        {
             "Classification": "spark-env",
             "Configurations": [{
                 "Classification": "export",
                 "Properties": {
-                    "JAVA_HOME": "/usr/lib/jvm/java-1.8.0",
                     "PYSPARK_PYTHON": "/usr/bin/python3"
                 }
             }],
@@ -142,7 +133,7 @@ JOB_FLOW_OVERRIDES = {
 
 
 # helper function
-def _local_to_s3(filename, key, bucket_name=BUCKET_NAME):
+def _copy_local_to_s3(filename, key, bucket_name=BUCKET_NAME):
     s3 = S3Hook(AWS_CREDENTIALS_CONN_ID)
     s3.load_file(filename=filename, bucket_name=bucket_name, replace=True, key=key)
 
@@ -150,7 +141,7 @@ def _local_to_s3(filename, key, bucket_name=BUCKET_NAME):
 def create_subdag(parent_dag_name: str, child_dag_name, args):
     dag = DAG(
         dag_id='{0}.{1}'.format(parent_dag_name, child_dag_name),
-        description='Load and transform data using spark',
+        description='Load and transform yelp\'s data using spark',
         default_args=args,
         catchup=False,
         schedule_interval=None,
@@ -161,8 +152,8 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
 
     script_to_s3 = PythonOperator(
         dag=dag,
-        task_id="script_to_s3",
-        python_callable=_local_to_s3,
+        task_id="copy_script_to_s3",
+        python_callable=_copy_local_to_s3,
         op_kwargs={"filename": local_script, "key": s3_script, },
     )
 

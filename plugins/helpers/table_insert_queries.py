@@ -40,9 +40,10 @@ class TableInsertQueries(object):
                 from seq_0_9 a, seq_0_9 b
                 order by num offset  1
             )
-            select st_b.business_id, TRIM(SPLIT_PART(st_b.categories, ',', seq.num))
+            select st_b.business_id, TRIM(SPLIT_PART(st_b.categories, ',', seq.num)) as category
             from  seq_1_99 as seq
             inner join staging_businesses st_b ON seq.num <= REGEXP_COUNT(st_b.categories, ',') + 1
+            where category!=''
             """,
         'fact_checkin': """
             INSERT INTO fact_checkin(business_id, timestamp, date_id) 
