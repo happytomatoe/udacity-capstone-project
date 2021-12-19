@@ -12,16 +12,17 @@ TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 
 S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
 
-BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "yelp_academic_dataset_business.json")
-USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "yelp_academic_dataset_user.json")
-REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "yelp_academic_dataset_review.json")
+BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "data/yelp_academic_dataset_business.json")
+USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "data/yelp_academic_dataset_user.json")
+REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_dataset_review.json")
 # TODO: add step to compute next resource
-CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
-TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "yelp_academic_dataset_tip.json")
+# TODO: rename to single form
+CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "clean_data/check-ins/")
+FRIEND_DATA_S3_KEY = Variable.get("friend_data_s3_key", "clean_data/friends/")
+TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
 
 
 def create_staging_tasks(dag: DAG):
-
     stage_businesses = StageToRedshiftOperator(
         task_id='stage_businesses',
         s3_bucket=S3_BUCKET,
@@ -100,14 +101,31 @@ def create_staging_tasks(dag: DAG):
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
+            CSV
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
             """),
         dag=dag
     )
-    return [stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews]
+    stage_friends = StageToRedshiftOperator(
+        task_id='stage_friends',
+        s3_bucket=S3_BUCKET,
+        s3_key=FRIEND_DATA_S3_KEY,
+        schema=TABLES_SCHEMA,
+        table="staging_friends",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+        copy_options=dedent("""
+            COMPUPDATE OFF STATUPDATE OFF
+            CSV
+            TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
+            TRUNCATECOLUMNS
+            BLANKSASNULL;
+            """),
+        dag=dag
+    )
+    return [stage_businesses, stage_tips, stage_checkins, stage_users, stage_reviews, stage_friends]
 
 
 def create_load_dimension_tasks(dag: DAG):
@@ -155,4 +173,11 @@ def create_load_facts_tasks(dag):
         dag=dag
     )
 
-    return [load_review_facts, load_business_category_facts, load_checkin_facts, load_tip_facts]
+    load_friend_facts = LoadFactOperator(
+        task_id='load_friend_fact_table',
+        table="fact_friend",
+        redshift_conn_id=REDSHIFT_CONN_ID,
+        dag=dag
+    )
+
+    return [load_review_facts, load_business_category_facts, load_checkin_facts, load_tip_facts, load_friend_facts]

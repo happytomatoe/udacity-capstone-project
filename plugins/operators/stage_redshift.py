@@ -5,7 +5,7 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
-
+# TODO: probably change to s3 to redshift operator
 class StageToRedshiftOperator(BaseOperator):
     """
         Copies data from s3 to redshift using `Copy Command <https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-source-s3.html/>`_.

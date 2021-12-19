@@ -6,10 +6,12 @@ from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.subdag_operator import SubDagOperator
 
 from helpers import TestCase
 from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
+from yelp_spark_pipeline import create_subdag
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
@@ -24,9 +26,6 @@ BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "data/yelp_academic_
 USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "data/yelp_academic_dataset_user.json")
 REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_dataset_review.json")
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
-
-# TODO: add step to compute next resource
-CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "cleaned-check-ins.json")
 
 enable_staging = True
 
@@ -92,7 +91,8 @@ with DAG(DAG_NAME,
         TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE stars<1 or stars>5", False),
 
         TestCase("SELECT  COUNT(*)>0 FROM fact_business_category WHERE category is null or trim(category) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_business_category WHERE business_id is null or trim(business_id) = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_business_category WHERE business_id is null or trim(business_id) = ''",
+                 False),
 
         TestCase("SELECT  COUNT(*)>0 FROM fact_tip WHERE user_id is null or trim(user_id) = ''", False),
         TestCase("SELECT  COUNT(*)>0 FROM fact_tip WHERE business_id is null or trim(business_id) = ''", False),
@@ -100,8 +100,9 @@ with DAG(DAG_NAME,
 
         TestCase("SELECT  COUNT(*)>0 FROM fact_checkin WHERE business_id is null or trim(business_id) = ''", False),
         TestCase("SELECT  COUNT(*)>0 FROM fact_checkin WHERE timestamp is null or trim(timestamp) = ''", False),
-
-
+        # TODO: add friends validation
+        TestCase("SELECT  COUNT(*)>0 FROM fact_friend WHERE user_id is null or trim(user_id) = ''", False),
+        TestCase("SELECT  COUNT(*)>0 FROM fact_friend WHERE friend_id is null or trim(friend_id) = ''", False),
 
         # TODO: what to do if this is continous pipeline? Should I calculate count beforehand?
         # TestCase("""SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category)
@@ -116,9 +117,21 @@ with DAG(DAG_NAME,
 
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
+    spark_etl = SubDagOperator(
+        task_id="yelp_spark_pipeline",
+        subdag=create_subdag(
+            parent_dag_name=DAG_NAME,
+            child_dag_name="yelp_spark_pipeline",
+            args=default_args
+        ),
+        default_args=default_args,
+        dag=dag,
+    )
+
     if enable_staging:
         staging_processes = create_staging_tasks(dag)
-        start_operator >> create_tables_if_not_exist >> populate_date_dimension_if_empty >> staging_processes
+        start_operator >> [create_tables_if_not_exist, spark_etl] >> populate_date_dimension_if_empty\
+        >> staging_processes
 
         for p in staging_processes:
             p >> load_dimensions

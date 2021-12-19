@@ -53,7 +53,10 @@ class TableInsertQueries(object):
             INSERT INTO fact_tip(user_id, business_id, text, compliment_count)  
             SELECT user_id, business_id, text, compliment_count  FROM  staging_tips
             """,
-
+        'fact_friend': """
+                INSERT INTO fact_friend(user_id,friend_id)
+                SELECT user_id,friend_id FROM  staging_friends
+                """,
     }
 
     @staticmethod
