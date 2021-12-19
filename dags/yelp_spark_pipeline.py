@@ -54,13 +54,67 @@ JOB_FLOW_OVERRIDES = {
     "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}],
     "Configurations": [
         {
-            "Classification": "spark-env",
-            "Configurations": [
-                {
-                    "Classification": "export",
-                    "Properties": {"PYSPARK_PYTHON": "/usr/bin/python3"},
+            "Classification": "yarn-site",
+            "Properties": {
+                "yarn.nodemanager.vmem-check-enabled": "false",
+                "yarn.nodemanager.pmem-check-enabled": "false"
+            }
+        },
+        {
+            "Classification": "spark",
+            "Properties": {
+                "maximizeResourceAllocation": "false"
+            }
+        },
+        {
+            "Classification": "spark-defaults",
+            "Properties": {
+                "spark.dynamicAllocation.enabled": "false",
+                "spark.sql.adaptive.enabled": "true",
+                "spark.driver.memory": "13G",
+                "spark.executor.memory": "13G",
+                "spark.executor.cores": "3",
+                "spark.executor.instances": "2",
+                "spark.executor.memoryOverhead": "1331M",
+                "spark.driver.memoryOverhead": "1331M",
+                "spark.memory.fraction": "0.80",
+                "spark.executor.extraJavaOptions": "-XX:+UseG1GC -XX:+UnlockDiagnosticVMOptions -XX:+G1SummarizeConcMark -XX:InitiatingHeapOccupancyPercent=35 -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:OnOutOfMemoryError='kill -9 %p'",
+                "spark.driver.extraJavaOptions": "-XX:+UseG1GC -XX:+UnlockDiagnosticVMOptions -XX:+G1SummarizeConcMark -XX:InitiatingHeapOccupancyPercent=35 -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:OnOutOfMemoryError='kill -9 %p'",
+                "spark.yarn.scheduler.reporterThread.maxFailures": "5",
+                "spark.storage.level": "MEMORY_AND_DISK_SER",
+                "spark.rdd.compress": "true",
+                "spark.shuffle.compress": "true",
+                "spark.shuffle.spill.compress": "true",
+                "spark.default.parallelism": "12"
+            }
+        },
+        {
+            "Classification": "mapred-site",
+            "Properties": {
+                "mapreduce.map.output.compress": "true"
+            }
+        },
+        {
+            "Classification": "hadoop-env",
+            "Configurations": [{
+                "Classification": "export",
+                "Configurations": [],
+                "Properties": {
+                    "JAVA_HOME": "/usr/lib/jvm/java-1.8.0"
                 }
-            ],
+            }],
+            "Properties": {}
+        },
+        {
+            "Classification": "spark-env",
+            "Configurations": [{
+                "Classification": "export",
+                "Properties": {
+                    "JAVA_HOME": "/usr/lib/jvm/java-1.8.0",
+                    "PYSPARK_PYTHON": "/usr/bin/python3"
+                }
+            }],
+            "Properties": {}
         }
     ],
     "Instances": {
@@ -69,13 +123,13 @@ JOB_FLOW_OVERRIDES = {
                 "Name": "Master node",
                 "Market": "SPOT",
                 "InstanceRole": "MASTER",
-                "InstanceType": "m5.xlarge",
+                "InstanceType": "m5d.xlarge",
                 "InstanceCount": 1,
             }, {
                 "Name": "Core - 2",
                 "Market": "SPOT",  # Spot instances are a "use as available" instances
                 "InstanceRole": "CORE",
-                "InstanceType": "m5.xlarge",
+                "InstanceType": "m5d.xlarge",
                 "InstanceCount": 2,
             },
         ],

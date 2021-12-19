@@ -43,6 +43,7 @@ with DAG(DAG_NAME,
          description='Load and transform data in Redshift with Airflow',
          catchup=False,
          schedule_interval=None,
+         max_active_runs=1,
          ) as dag:
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
@@ -130,7 +131,7 @@ with DAG(DAG_NAME,
 
     if enable_staging:
         staging_processes = create_staging_tasks(dag)
-        start_operator >> [create_tables_if_not_exist, spark_etl] >> populate_date_dimension_if_empty\
+        start_operator >> spark_etl >> create_tables_if_not_exist >> populate_date_dimension_if_empty \
         >> staging_processes
 
         for p in staging_processes:
