@@ -37,7 +37,7 @@ venv: requirements.txt
 
 
 test: venv
-	${PYTHON_VENV} -m pytest
+	${PYTHON_VENV} -m pytest ./dags/scripts
 
 lint: venv
 	${PYTHON_VENV} -m pylint src/
@@ -88,7 +88,9 @@ jupyter-install: venv
 )
 
 run: jupyter-install
+	docker-compose up -d&&xdg-open http://localhost:8080
 	 $(VENV_ACTIVATE); jupyter notebook
+
 # dwh/'IAC Redshift.ipynb'
 # 'Capstone Project Yelp.ipynb';
 

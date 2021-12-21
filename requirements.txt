@@ -1,16 +1,7 @@
-py4j
-pandas
-jupyter
-ipykernel
-jupyterthemes
-jupyter_contrib_nbextensions
-
-yapf
-isort
-autopep8
-pandas
-boto3
-ipython-sql
-psycopg2-binary
-
+pyspark
 apache-airflow == 1.10.15
+
+# tests
+findspark
+pytest
+chispa

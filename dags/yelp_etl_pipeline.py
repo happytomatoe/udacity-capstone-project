@@ -4,14 +4,13 @@ from textwrap import dedent
 
 from airflow import DAG
 from airflow.models import Variable
+from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
-from airflow.operators.subdag_operator import SubDagOperator
 
 from helpers import TestCase
 from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
-from yelp_spark_pipeline import create_subdag
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
@@ -28,6 +27,7 @@ REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_da
 TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
 
 enable_staging = False
+run_spark = False
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -118,21 +118,20 @@ with DAG(DAG_NAME,
 
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
-    spark_etl = SubDagOperator(
-        task_id="yelp_spark_pipeline",
-        subdag=create_subdag(
-            parent_dag_name=DAG_NAME,
-            child_dag_name="yelp_spark_pipeline",
-            args=default_args
-        ),
-        default_args=default_args,
-        dag=dag,
-    )
+    if run_spark:
+        spark_etl = TriggerDagRunOperator(
+            task_id="yelp_spark_pipeline",
+            trigger_dag_id="yelp_spark_pipeline",
+            wait_for_completion=True,
+            dag=dag,
+        )
+        start_operator >> spark_etl >> create_tables_if_not_exist >> populate_date_dimension_if_empty
+    else:
+        start_operator >> create_tables_if_not_exist >> populate_date_dimension_if_empty
 
     if enable_staging:
         staging_processes = create_staging_tasks(dag)
-        start_operator >> spark_etl >> create_tables_if_not_exist >> populate_date_dimension_if_empty \
-        >> staging_processes
+        populate_date_dimension_if_empty >> staging_processes
 
         for p in staging_processes:
             p >> load_dimensions
@@ -143,7 +142,7 @@ with DAG(DAG_NAME,
         load_facts >> run_quality_checks >> end_operator
 
     else:
-        start_operator >> create_tables_if_not_exist >> populate_date_dimension_if_empty >> load_dimensions
+        populate_date_dimension_if_empty >> load_dimensions
 
         for d in load_dimensions:
             d >> load_facts
