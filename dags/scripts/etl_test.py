@@ -29,7 +29,7 @@ def spark(request):
              .getOrCreate())
     request.addfinalizer(lambda: spark.stop())
 
-    # quiet_py4j()
+    quiet_py4j()
     return spark
 
 
@@ -56,16 +56,17 @@ def test_checkins_transform(spark):
 
 def test_friends_transformation(spark):
     users = [
-        {"user_id": "id1", "name": "Jack", "friends": "f1, f2, f3"},
-        {"user_id": "id2", "name": "Jane", "friends": "f4, f5, f6"},
+        {"user_id": "id1", "name": "Jack", "friends": "id2, id3"},
+        {"user_id": "id2", "name": "Jane", "friends": "id1, id3"},
+        {"user_id": "id3", "name": "Jane", "friends": "id1, id2"},
     ]
     expected = [
-        {"user_id": "id1", "friend_id": "f1"},
-        {"user_id": "id1", "friend_id": "f2"},
-        {"user_id": "id1", "friend_id": "f3"},
-        {"user_id": "id2", "friend_id": "f4"},
-        {"user_id": "id2", "friend_id": "f5"},
-        {"user_id": "id2", "friend_id": "f6"},
+        {"user_id": "id1", "friend_id": "id2"},
+        {"user_id": "id1", "friend_id": "id3"},
+        {"user_id": "id1", "friend_id": "id1"},
+        {"user_id": "id2", "friend_id": "id3"},
+        {"user_id": "id3", "friend_id": "id1"},
+        {"user_id": "id3", "friend_id": "id2"},
     ]
     df = spark.read.json(spark.sparkContext.parallelize([users]))
     actual = etl._create_friends_inner(df)

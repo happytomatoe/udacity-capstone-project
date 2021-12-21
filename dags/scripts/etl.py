@@ -27,10 +27,14 @@ def _create_friends(input_loc, output_loc):
 def _create_friends_inner(df):
     df_users = df.selectExpr("user_id").alias("u")
     df_friends = df.filter(df.friends != "None").selectExpr("user_id",
-                                                            "explode(split(friends,',')) as friend_id").selectExpr(
-        "user_id", "ltrim(friend_id) as friend_id").alias("f")
+                                                            "explode(split(friends,',')) as friend_id")\
+        .selectExpr("user_id", "ltrim(friend_id) as friend_id").alias("f")
     # Filter out friends that are not found as users
+    print("Schema")
+    df_friends.show()
     df_friends = df_friends.join(df_users, col("f.friend_id") == col("u.user_id")).drop(df_users.user_id)
+    df_friends.show()
+
     return df_friends
 
 
