@@ -63,14 +63,15 @@ def test_friends_transformation(spark):
     expected = [
         {"user_id": "id1", "friend_id": "id2"},
         {"user_id": "id1", "friend_id": "id3"},
-        {"user_id": "id1", "friend_id": "id1"},
+        {"user_id": "id2", "friend_id": "id1"},
         {"user_id": "id2", "friend_id": "id3"},
         {"user_id": "id3", "friend_id": "id1"},
         {"user_id": "id3", "friend_id": "id2"},
     ]
+
     df = spark.read.json(spark.sparkContext.parallelize([users]))
     actual = etl._create_friends_inner(df)
-    actual.show(10)
+
     expected = spark.read.json(spark.sparkContext.parallelize([expected]))
-    assert_df_equality(expected, actual)
+    assert_df_equality(expected, actual, ignore_column_order=True, ignore_row_order=True)
 

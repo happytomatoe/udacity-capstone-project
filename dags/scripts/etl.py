@@ -32,7 +32,9 @@ def _create_friends_inner(df):
     # Filter out friends that are not found as users
     print("Schema")
     df_friends.show()
-    df_friends = df_friends.join(df_users, col("f.friend_id") == col("u.user_id")).drop(df_users.user_id)
+
+    c = col("u.user_id")
+    df_friends = df_friends.join(df_users, col("f.friend_id") == c).drop(c)
     df_friends.show()
 
     return df_friends
