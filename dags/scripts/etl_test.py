@@ -67,6 +67,7 @@ def test_friends_transformation(spark):
         {"user_id": "id2", "friend_id": "id3"},
         {"user_id": "id3", "friend_id": "id1"},
         {"user_id": "id3", "friend_id": "id2"},
+        {"user_id": "id3", "friend_id": "id5"},
     ]
 
     df = spark.read.json(spark.sparkContext.parallelize([users]))
