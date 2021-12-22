@@ -6,14 +6,13 @@
 # Description
 In this project the goal is to build data warehouse tables that later can be used for EDA.  
 
-
 # Data Source
 
-In this project this dataset was used - https://www.kaggle.com/yelp-dataset/yelp-dataset
-The dataset contains 8,635,403 reviews, 160,585 businesses, 1,162,119 tips by 2,189,457 users. 
-Aggregated check-ins over time for each of the 138,876 businesses. 
+In this project this dataset was used - https://www.kaggle.com/yelp-dataset/yelp-dataset.<br>
+The dataset contains 8,635,403 reviews, 160,585 businesses, 1,162,119 tips by 2,189,457 users.<br> 
+Aggregated check-ins over time for each of the 138,876 businesses. <br>
 It was originally put together for the Yelp Dataset Challenge which is a chance for students to conduct research or 
-analysis on Yelp's data and share their discoveries. 
+analysis on Yelp's data and share their discoveries. <br>
 In the most recent dataset you'll find information about businesses across 8 metropolitan areas in the USA and Canada.
 
 # Architecture
