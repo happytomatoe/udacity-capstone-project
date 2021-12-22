@@ -3,7 +3,6 @@ from datetime import datetime
 from textwrap import dedent
 
 from airflow import DAG
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.python_operator import PythonOperator

@@ -26,11 +26,6 @@ DAG_NAME = os.path.basename(__file__).replace('.py', '')
 LOCAL_SCRIPT_PATH = "./dags/scripts/etl.py"
 S3_SCRIPT_KEY = "scripts/etl.py"
 
-# spark_params="""
-# --master yarn --deploy-mode cluster --num-executors 2 --executor-cores 3 --driver-cores 3 --conf spark.default.parallelism=12
-#   --conf spark.dynamicAllocation.enabled=false --conf spark.sql.adaptive.enabled=true
-# """
-
 SPARK_STEPS = [
     {
         "Name": "Yelp ETL",
@@ -39,7 +34,6 @@ SPARK_STEPS = [
             "Jar": "command-runner.jar",
             "Args": [
                 "spark-submit",
-                # *spark_params.split(),
                 "s3://{{ params.s3_bucket }}/{{ params.s3_script }}",
                 "--check-ins-input-path", "s3://{{ params.s3_bucket }}/{{params.check_in_data_key}}",
                 "--users-input-path", "s3://{{ params.s3_bucket }}/{{ params.user_data_key }}",
@@ -62,23 +56,15 @@ default_args = {
 }
 
 
-# with DAG(
-#     dag_id=DAG_NAME,
-#     description='Load and transform yelp\'s data using spark',
-#     default_args=default_args,
-#     catchup=False,
-#     schedule_interval=None,
-#     # max_active_runs=1
-# ) as dag:
 def create_subdag(parent_dag_name: str, child_dag_name, args):
     with DAG(
-        dag_id='{0}.{1}'.format(parent_dag_name, child_dag_name),
-        description='Load and transform data using spark',
-        default_args=args,
-        catchup=False,
-        schedule_interval=None,
-        # max_active_runs=1
-    )as dag:
+            dag_id='{0}.{1}'.format(parent_dag_name, child_dag_name),
+            description='Load and transform data using spark',
+            default_args=args,
+            catchup=False,
+            schedule_interval=None,
+            # max_active_runs=1
+    ) as dag:
         start_data_pipeline = DummyOperator(task_id="start_data_pipeline", dag=dag)
 
         script_to_s3 = PythonOperator(
