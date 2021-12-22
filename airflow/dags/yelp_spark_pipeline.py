@@ -43,8 +43,45 @@ SPARK_STEPS = [
     },
 ]
 
-with open('./dags/config/emr_cluster.json') as f:
-    JOB_FLOW_OVERRIDES = json.load(f)
+JOB_FLOW_OVERRIDES = {
+    "Name": "Yelp ETL",
+    "ReleaseLabel": "emr-5.33.1",
+    "LogUri": "s3n://aws-emr-resources-508278446598-us-west-2/",
+    "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}],
+    "Configurations": [
+        {
+            "Classification": "spark-env",
+            "Configurations": [{
+                "Classification": "export",
+                "Properties": {
+                    "PYSPARK_PYTHON": "/usr/bin/python3"
+                }
+            }],
+            "Properties": {}
+        }
+    ],
+    "Instances": {
+        "InstanceGroups": [
+            {
+                "Name": "Master node",
+                "Market": "SPOT",
+                "InstanceRole": "MASTER",
+                "InstanceType": "m5.xlarge",
+                "InstanceCount": 1
+            }, {
+                "Name": "Core - 2",
+                "Market": "SPOT",
+                "InstanceRole": "CORE",
+                "InstanceType": "m5.xlarge",
+                "InstanceCount": 2
+            }
+        ],
+        "KeepJobFlowAliveWhenNoSteps": True,
+        "TerminationProtected": False
+    },
+    "JobFlowRole": "EMR_EC2_DefaultRole",
+    "ServiceRole": "EMR_DefaultRole"
+}
 
 default_args = {
     'owner': 'Roman Lukash',
