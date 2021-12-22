@@ -22,7 +22,7 @@ In the most recent dataset you'll find information about businesses across 8 met
 Airflow dag:
 ![img.png](docs/dag.png)
 Spark subdag:
-![img.png](docs/spark_dag.png)
+![img.png](docs/spark_subdag.png)
 
 
 ## Project structure

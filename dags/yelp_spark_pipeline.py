@@ -141,7 +141,7 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
                 dag=dag,
                 trigger_rule="all_done"
             )
-            step_checker >> terminate_emr_cluster
+            step_checker >> terminate_emr_cluster >> end_data_pipeline
         else:
             step_checker >> end_data_pipeline
 
