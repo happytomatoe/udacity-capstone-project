@@ -16,7 +16,7 @@ from yelp_spark_pipeline import create_subdag
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
-DIM_DATE_DATA_FILE_NAME = "data/dim_date.csv"
+DIM_DATE_DATA_FILE_NAME = "dim_date.csv"
 
 enable_staging = True
 run_spark = True
