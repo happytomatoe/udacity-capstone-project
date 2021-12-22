@@ -1,9 +1,7 @@
-# make sure env variables are set correctly
-import findspark  # this needs to be the first import
-from chispa import assert_df_equality
-
+import findspark
 findspark.init()
 
+from chispa import assert_df_equality
 import logging
 import pytest
 

@@ -33,17 +33,14 @@ CREATE TABLE IF NOT EXISTS "dim_business"
     "name"         text NOT NULL,
     "address"      text,
     "city"         text,
---     TODO: what to do with 3 char wrong province?
     "state"        varchar(3),
     "postal_code"  varchar(32),
---     TODO: this dimension missing country
     "latitude"     double precision,
     "longitude"    double precision,
     "stars"        real,
     "review_count" int4,
     "is_open"      boolean
 );
--- TODO: should I add interleaved sort key?
 
 
 -- ------------------------------------------------------FACTS ---
@@ -65,9 +62,8 @@ CREATE TABLE IF NOT EXISTS "fact_review"
 CREATE TABLE IF NOT EXISTS "fact_business_category"
 (
     "category"    text                             NOT NULL,
-    "business_id" char(22) references dim_business NOT NULL distkey
+    "business_id" char(22) references dim_business NOT NULL distkey sortkey
 );
--- TODO: should I add interleaved sort key?
 
 -- tips
 -- {"user_id":"sNVpZLDSlCudlXLsnJpg7A","business_id":"Wqetc51pFQzz04SXh_AORA","text":"So busy...","date":"2014-06-07 12:09:55","compliment_count":0}
@@ -78,7 +74,7 @@ CREATE TABLE IF NOT EXISTS fact_tip
     business_id      char(22) references dim_business NOT NULL,
     text             varchar(5000)                    NOT NULL,
     compliment_count int2
-);
+) INTERLEAVED SORTKEY (user_id, business_id);
 
 -- checkins
 -- {"business_id":"--0zrn43LEaB4jUWTQH_Bg","date":"2010-10-08 22:21:20, 2010-11-01 21:29:14, 2010-12-23 22:55:45,
@@ -87,7 +83,7 @@ CREATE TABLE IF NOT EXISTS fact_tip
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
     "business_id" char(22) references dim_business NOT NULL,
-    "timestamp"   timestamp                        NOT NULL sortkey,
+    "timestamp"   timestamp                        NOT NULL,
     "date_id"     int4 references dim_date
 );
 
@@ -106,9 +102,7 @@ CREATE TABLE IF NOT EXISTS staging_users
     user_id       char(22),
     average_stars real,
     cool          int4,
---     elite              text,
     fans          int4,
---     TODO: do we need to add friends?
     friends       text,
     funny         int4,
     name          text,
@@ -137,7 +131,6 @@ CREATE TABLE IF NOT EXISTS staging_businesses
     categories   text,
     city         text,
     is_open      boolean,
---     TODO: check if need to change
     latitude     double precision,
     longitude    double precision,
     name         text,

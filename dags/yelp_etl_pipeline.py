@@ -3,28 +3,17 @@ from datetime import datetime
 from textwrap import dedent
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.python_operator import PythonOperator
 
+from common import *
 from helpers import TestCase
 from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
-
-DIMESIONS_LOAD_MODE = Variable.get("dimenions_load_mode", "delete-load")
-REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
-AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
-TABLES_SCHEMA = Variable.get("redshift_schema", "public")
-
-S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
-
-BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "data/yelp_academic_dataset_business.json")
-USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "data/yelp_academic_dataset_user.json")
-REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_dataset_review.json")
-TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
 
 enable_staging = False
 run_spark = False
@@ -53,6 +42,13 @@ with DAG(DAG_NAME,
         sql="sql/create_schema.sql",
     )
 
+    copy_dim_data_to_s3 = PythonOperator(
+        dag=dag,
+        task_id="copy_script_to_s3",
+        python_callable=copy_local_to_s3,
+        op_kwargs={"filename": "./dags/dim_date.csv", "key": f"{RAW_DATA_PATH}/", },
+    )
+
     populate_date_dimension_if_empty = PopulateTableOperator(
         task_id='populate_date_dimension_if_empty',
         s3_bucket=S3_BUCKET,
@@ -72,14 +68,14 @@ with DAG(DAG_NAME,
     load_facts = create_load_facts_tasks(dag)
 
     test_cases = [
-        # table is empty checks
+        # Check if tables are empty
         TestCase("SELECT  COUNT(*)>0 FROM fact_review", True),
         TestCase("SELECT  COUNT(*)>0 FROM fact_checkin", True),
         TestCase("SELECT  COUNT(*)>0 FROM fact_tip", True),
         TestCase("SELECT  COUNT(*)>0 FROM fact_business_category", True),
         TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
         TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
-        # NOT NULL checks
+        # Individual checks
         TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE name is null or trim(name) = ''", False),
         TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE user_id is null", False),
         TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE business_id is null", False),
@@ -101,13 +97,9 @@ with DAG(DAG_NAME,
 
         TestCase("SELECT  COUNT(*)>0 FROM fact_checkin WHERE business_id is null or trim(business_id) = ''", False),
         TestCase("SELECT  COUNT(*)>0 FROM fact_checkin WHERE timestamp is null or trim(timestamp) = ''", False),
-        # TODO: add friends validation
+
         TestCase("SELECT  COUNT(*)>0 FROM fact_friend WHERE user_id is null or trim(user_id) = ''", False),
         TestCase("SELECT  COUNT(*)>0 FROM fact_friend WHERE friend_id is null or trim(friend_id) = ''", False),
-
-        # TODO: what to do if this is continous pipeline? Should I calculate count beforehand?
-        # TestCase("""SELECT SUM(REGEXP_COUNT(s.categories, ',') + 1)=(SELECT COUNT(*) FROM fact_business_category)
-        #              FROM staging_businesses s""", True)
     ]
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
@@ -125,9 +117,11 @@ with DAG(DAG_NAME,
             wait_for_completion=True,
             dag=dag,
         )
-        start_operator >> spark_etl >> create_tables_if_not_exist >> populate_date_dimension_if_empty
+        start_operator >> spark_etl >> create_tables_if_not_exist >> copy_dim_data_to_s3
     else:
-        start_operator >> create_tables_if_not_exist >> populate_date_dimension_if_empty
+        start_operator >> create_tables_if_not_exist >> copy_dim_data_to_s3
+
+    copy_dim_data_to_s3 >> populate_date_dimension_if_empty
 
     if enable_staging:
         staging_processes = create_staging_tasks(dag)

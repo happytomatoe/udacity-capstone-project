@@ -1,25 +1,10 @@
 from textwrap import dedent
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.operators import (LoadFactOperator, LoadDimensionOperator)
-from airflow.operators import StageToRedshiftOperator, PopulateTableOperator
+from airflow.operators import StageToRedshiftOperator
 
-DIMESIONS_LOAD_MODE = Variable.get("dimenions_load_mode", "delete-load")
-REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
-AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
-TABLES_SCHEMA = Variable.get("redshift_schema", "public")
-
-S3_BUCKET = Variable.get("s3_bucket", "yelp-eu-north-1")
-
-BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", "data/yelp_academic_dataset_business.json")
-USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", "data/yelp_academic_dataset_user.json")
-REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", "data/yelp_academic_dataset_review.json")
-# TODO: add step to compute next resource
-# TODO: rename to single form
-CHECK_IN_DATA_S3_KEY = Variable.get("check_in_data_s3_key", "clean_data/check-ins/")
-FRIEND_DATA_S3_KEY = Variable.get("friend_data_s3_key", "clean_data/friends/")
-TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", "data/yelp_academic_dataset_tip.json")
+from common import *
 
 
 def create_staging_tasks(dag: DAG):
@@ -94,7 +79,7 @@ def create_staging_tasks(dag: DAG):
     stage_checkins = StageToRedshiftOperator(
         task_id='stage_checkins',
         s3_bucket=S3_BUCKET,
-        s3_key=CHECK_IN_DATA_S3_KEY,
+        s3_key=PROCESSED_CHECK_IN_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_checkins",
         redshift_conn_id=REDSHIFT_CONN_ID,
