@@ -37,7 +37,7 @@ venv: requirements.txt
 
 
 test: venv
-	${PYTHON_VENV} -m pytest ./dags/scripts
+	${PYTHON_VENV} -m pytest ./airflow/dags/scripts
 
 lint: venv
 	${PYTHON_VENV} -m pylint src/
