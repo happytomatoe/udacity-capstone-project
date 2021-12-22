@@ -1,8 +1,9 @@
 from textwrap import dedent
 
 from airflow import DAG
-from airflow.operators import (LoadFactOperator, LoadDimensionOperator)
-from airflow.operators import StageToRedshiftOperator
+from operators.load_fact_operator import LoadFactOperator
+from operators.load_dimension_operator import LoadDimensionOperator
+from operators.stage_redshift_operator import StageToRedshiftOperator
 
 from common import *
 
