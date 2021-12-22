@@ -120,6 +120,7 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
             region_name=AWS_REGION,
         )
 
+        # Copied from https://github.com/aws-samples/emr-studio-samples/blob/main/airflow_dag_for_execution/simple_dag.py         
         class CustomEmrJobFlowSensor(EmrJobFlowSensor):
             """
             Asks for the state of the JobFlow until it reaches WAITING/RUNNING state.
@@ -154,9 +155,9 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
         )
 
         last_step = len(SPARK_STEPS) - 1
-        # wait for the steps to complete
-        step_checker = EmrStepSensor(
-            task_id="watch_step",
+        
+        wait_for_step_to_complete = EmrStepSensor(
+            task_id="wait_for_step_to_complete",
             job_flow_id=job_flow_id,
             step_id=f"{{{{ task_instance.xcom_pull(task_ids='add_steps', key='return_value')[{last_step}] }}}}",
             aws_conn_id=AWS_CREDENTIALS_CONN_ID,
@@ -166,9 +167,9 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
         end_data_pipeline = DummyOperator(task_id="end_data_pipeline", dag=dag)
 
         start_data_pipeline >> script_to_s3 >> get_or_create_emr_cluster >> wait_for_cluster_to_start
-        wait_for_cluster_to_start >> step_adder >> step_checker
+        wait_for_cluster_to_start >> step_adder >> wait_for_step_to_complete
         if terminate_cluster:
-            # Terminate the EMR cluster
+            
             terminate_emr_cluster = EmrTerminateJobFlowOperator(
                 task_id="terminate_emr_cluster",
                 job_flow_id=job_flow_id,
@@ -176,8 +177,8 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
                 dag=dag,
                 trigger_rule="all_done"
             )
-            step_checker >> terminate_emr_cluster >> end_data_pipeline
+            wait_for_step_to_complete >> terminate_emr_cluster >> end_data_pipeline
         else:
-            step_checker >> end_data_pipeline
+            wait_for_step_to_complete >> end_data_pipeline
 
     return dag

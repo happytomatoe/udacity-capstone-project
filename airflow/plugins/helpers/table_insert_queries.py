@@ -1,4 +1,7 @@
 class TableInsertQueries(object):
+    """
+        Contains a dictionary with table name as a key and insert query as a value   
+    """
     __dict = {
         'dim_user': """
          INSERT INTO dim_user(user_id, name, yelping_since, yelping_since_date_id, review_count,  usefull, funny, cool, 

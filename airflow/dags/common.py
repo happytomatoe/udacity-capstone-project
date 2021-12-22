@@ -1,3 +1,6 @@
+"""
+    Common functionality. Includes airflow variables and functions
+"""
 import os
 
 from airflow.hooks.S3_hook import S3Hook

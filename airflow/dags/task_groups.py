@@ -1,3 +1,7 @@
+"""
+    Includes functions to create group of tasks
+"""
+
 from textwrap import dedent
 
 from airflow import DAG

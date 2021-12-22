@@ -31,7 +31,7 @@ def spark(request):
     return spark
 
 
-def test_checkins_transform(spark):
+def test_checkins_transformation(spark):
     users = [
         {"business_id": "id1", "date": "2000-01-01 17:00:00"},
         {"business_id": "id2", "date": "2000-01-01 17:00:01, 2000-01-01 17:00:02, 2000-01-01 17:00:03"},

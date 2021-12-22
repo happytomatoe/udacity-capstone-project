@@ -6,6 +6,14 @@ from airflow.utils import apply_defaults
 
 
 class EmrGetOrCreateJobFlowOperator(EmrCreateJobFlowOperator):
+    """
+        Tries to find EMR cluster by name or creates it if not found
+        :param aws_conn_id  – aws connection to uses
+        :type aws_conn_id: str
+        :param emr_conn_id  – emr connection to use
+        :param job_flow_overrides – boto3 style arguments to override emr_connection extra. (templated)
+        :param job_flow_overrides: dict
+    """
     @apply_defaults
     def __init__(
             self,
