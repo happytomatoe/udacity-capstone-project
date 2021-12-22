@@ -16,6 +16,7 @@ analysis on Yelp's data and share their discoveries. <br>
 In the most recent dataset you'll find information about businesses across 8 metropolitan areas in the USA and Canada.
 
 # Architecture
+![img.png](docs/architecture.png)
 
 
 # ETL flow
