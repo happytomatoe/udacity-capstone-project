@@ -182,7 +182,7 @@ event_datafile_new.csv
 logs
 files
 database
-data
+/data
 sas_data
 
 dwh/dwh.cfg

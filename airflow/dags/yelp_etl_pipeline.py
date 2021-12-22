@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from textwrap import dedent
 
 from airflow import DAG
@@ -16,7 +16,7 @@ from yelp_spark_pipeline import create_subdag
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
-DIM_DATE_DATA_FILE_NAME = "dim_date.csv"
+DIM_DATE_DATA_FILE_NAME = "data/dim_date.csv"
 
 enable_staging = True
 run_spark = True
@@ -25,9 +25,9 @@ default_args = {
     'owner': 'Roman Lukash',
     'depends_on_past': False,
     'start_date': datetime(2018, 11, 1),
-    # 'retries': 3,
-    # 'retry_delay': timedelta(minutes=5),
-    # 'email_on_retry': False,
+    'retries': 5,
+    'retry_delay': timedelta(minutes=2),
+    'email_on_retry': False,
 }
 
 with DAG(DAG_NAME,
@@ -35,7 +35,7 @@ with DAG(DAG_NAME,
          description='Load and transform data in Redshift with Airflow',
          catchup=False,
          schedule_interval=None,
-         # max_active_runs=1,
+         max_active_runs=1,
          ) as dag:
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
@@ -50,7 +50,7 @@ with DAG(DAG_NAME,
         dag=dag,
         task_id="copy_date_dim_data_to_s3",
         python_callable=copy_local_to_s3,
-        op_kwargs={"filename": f"./dags/{DIM_DATE_DATA_FILE_NAME}", "key": dim_date_data_s3_key, },
+        op_kwargs={"filename": f"./dags/data/{DIM_DATE_DATA_FILE_NAME}", "key": dim_date_data_s3_key, },
     )
 
     populate_date_dimension_if_empty = PopulateTableOperator(

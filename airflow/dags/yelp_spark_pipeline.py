@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
@@ -15,7 +15,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from common import *
 from operators.emr_get_or_create_job_flow_operator import EmrGetOrCreateJobFlowOperator
 
-terminate_cluster = True
+terminate_cluster = False
 
 EMR_CREDENTIALS_CONN_ID = Variable.get("emr_credentials_conn_id", "emr_credentials")
 
@@ -50,9 +50,9 @@ default_args = {
     'owner': 'Roman Lukash',
     'depends_on_past': False,
     'start_date': datetime(2018, 11, 1),
-    # 'retries': 3,
-    # 'retry_delay': timedelta(minutes=5),
-    # 'email_on_retry': False,
+    'retries': 5,
+    'retry_delay': timedelta(minutes=2),
+    'email_on_retry': False,
 }
 
 

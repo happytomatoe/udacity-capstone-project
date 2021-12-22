@@ -64,7 +64,6 @@ Post your write-up and final data model in a GitHub repo.
 - If the database needed to be accessed by 100+ people.
  
 TODO: 
-- add instruction to generate/upload dim_date.csv
 - add data dictionary
 
 
