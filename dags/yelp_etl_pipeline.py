@@ -15,6 +15,8 @@ from task_groups import create_staging_tasks, create_load_dimension_tasks, creat
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
+DIM_DATE_DATA_FILE_NAME = "dim_date.csv"
+
 enable_staging = False
 run_spark = False
 
@@ -42,17 +44,18 @@ with DAG(DAG_NAME,
         sql="sql/create_schema.sql",
     )
 
-    copy_dim_data_to_s3 = PythonOperator(
+    dim_date_data_s3_key = f"{RAW_DATA_PATH}/{DIM_DATE_DATA_FILE_NAME}"
+    copy_date_dim_data_to_s3 = PythonOperator(
         dag=dag,
-        task_id="copy_script_to_s3",
+        task_id="copy_date_dim_data_to_s3",
         python_callable=copy_local_to_s3,
-        op_kwargs={"filename": "./dags/dim_date.csv", "key": f"{RAW_DATA_PATH}/", },
+        op_kwargs={"filename": f"./dags/{DIM_DATE_DATA_FILE_NAME}", "key": dim_date_data_s3_key, },
     )
 
     populate_date_dimension_if_empty = PopulateTableOperator(
         task_id='populate_date_dimension_if_empty',
         s3_bucket=S3_BUCKET,
-        s3_key="dim_date.csv",
+        s3_key=dim_date_data_s3_key,
         schema=TABLES_SCHEMA,
         table="dim_date",
         redshift_conn_id=REDSHIFT_CONN_ID,
@@ -117,11 +120,12 @@ with DAG(DAG_NAME,
             wait_for_completion=True,
             dag=dag,
         )
-        start_operator >> spark_etl >> create_tables_if_not_exist >> copy_dim_data_to_s3
+        start_operator >> spark_etl >> [create_tables_if_not_exist, copy_date_dim_data_to_s3]
     else:
-        start_operator >> create_tables_if_not_exist >> copy_dim_data_to_s3
+        start_operator >> [create_tables_if_not_exist, copy_date_dim_data_to_s3]
 
-    copy_dim_data_to_s3 >> populate_date_dimension_if_empty
+    create_tables_if_not_exist >> populate_date_dimension_if_empty
+    copy_date_dim_data_to_s3 >> populate_date_dimension_if_empty
 
     if enable_staging:
         staging_processes = create_staging_tasks(dag)
