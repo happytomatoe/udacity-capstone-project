@@ -13,7 +13,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from common import *
 from operators.emr_get_or_create_job_flow_operator import EmrGetOrCreateJobFlowOperator
 
-terminate_cluster = False
+terminate_cluster = True
 
 EMR_CREDENTIALS_CONN_ID = Variable.get("emr_credentials_conn_id", "emr_credentials")
 
