@@ -6,6 +6,9 @@ from pyspark.sql.functions import col
 
 
 def _transform_checkins(input_loc, output_loc):
+    """
+        Transforms check-ins by unnesting date field
+    """
     df = spark.read.json(f"{input_loc}")
     _transform_checkins_inner(df) \
         .write.format('csv').mode("overwrite").save(f"{output_loc}/check-ins")
@@ -17,6 +20,10 @@ def _transform_checkins_inner(df):
 
 
 def _create_friends(input_loc, output_loc):
+    """
+        Creates user-friend relation by unnesting friend field
+        Also filters out friends that are not registered in the dataset
+    """
     df = spark.read.json(input_loc)
     df.cache()
     df_friends = _create_friends_inner(df)
@@ -27,15 +34,13 @@ def _create_friends(input_loc, output_loc):
 def _create_friends_inner(df):
     df_users = df.selectExpr("user_id").alias("u")
     df_friends = df.filter(df.friends != "None").selectExpr("user_id",
-                                                            "explode(split(friends,',')) as friend_id")\
+                                                            "explode(split(friends,',')) as friend_id") \
         .selectExpr("user_id", "ltrim(friend_id) as friend_id").alias("f")
-    # Filter out friends that are not found as users
-    print("Schema")
-    df_friends.show()
 
     c = col("u.user_id")
-    df_friends = df_friends.join(df_users, col("f.friend_id") == c).drop(c)
-    df_friends.show()
+    # TODO: should we do this in the datawarehouse?
+    # Filter out friends that are not registered
+    # df_friends = df_friends.join(df_users, col("f.friend_id") == c).drop(c)
 
     return df_friends
 

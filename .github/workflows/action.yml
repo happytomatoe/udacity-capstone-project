@@ -1,0 +1,51 @@
+---
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: "Python ${{ matrix.python-version }}"
+    runs-on: "ubuntu-latest"
+
+    env:
+      USING_COVERAGE: '3.6,3.8'
+
+    strategy:
+      matrix:
+        python-version: ["3.8"]
+
+    steps:
+      - uses: "actions/checkout@v2"
+#       Adapter from https://github.com/actions/setup-python
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - uses: vemonet/setup-spark@v1
+        with:
+          spark-version: '3.1.2'
+          hadoop-version: '3.2'
+      - name: "Install dependencies and run tests"
+        run: |
+          make test
+      - name: Send email if failed
+        uses: dawidd6/action-send-mail@v2.4.0
+        if: ${{ failure() }}
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: Github Actions job failed
+          to: ${{secrets.TO_EMAIL}}
+          from: ${{secrets.FROM_EMAIL}}
+          body: More details https://github.com/happytomatoe/data-modeling-with-postgres/actions
