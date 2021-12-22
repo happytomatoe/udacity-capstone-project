@@ -5,7 +5,6 @@ from airflow.utils.decorators import apply_defaults
 from helpers import TestCase
 
 
-# TODO: add feature to process all validations even if 1 of them failed
 class DataQualityOperator(BaseOperator):
     """
         Runs test cases (see :class: `~helpers.TestCase` ) and raises error if  expected and
