@@ -7,18 +7,20 @@ from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.subdag_operator import SubDagOperator
 
 from common import *
-from helpers import TestCase
 from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
+from test_cases import test_cases
+from yelp_spark_pipeline import create_subdag
 
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
 DIM_DATE_DATA_FILE_NAME = "dim_date.csv"
 
-enable_staging = False
-run_spark = False
+enable_staging = True
+run_spark = True
 
 default_args = {
     'owner': 'Roman Lukash',
@@ -70,40 +72,6 @@ with DAG(DAG_NAME,
     load_dimensions = create_load_dimension_tasks(dag)
     load_facts = create_load_facts_tasks(dag)
 
-    test_cases = [
-        # Check if tables are empty
-        TestCase("SELECT  COUNT(*)>0 FROM fact_review", True),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_checkin", True),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_tip", True),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_business_category", True),
-        TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
-        TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
-        # Individual checks
-        TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE name is null or trim(name) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE user_id is null", False),
-        TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE business_id is null", False),
-        TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE name is null or trim(name) = ''", False),
-
-        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE review_id is null or trim(review_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE user_id is null or trim(user_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE business_id is null or trim(business_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE text is null or trim(text) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE stars<1 or stars>5", False),
-
-        TestCase("SELECT  COUNT(*)>0 FROM fact_business_category WHERE category is null or trim(category) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_business_category WHERE business_id is null or trim(business_id) = ''",
-                 False),
-
-        TestCase("SELECT  COUNT(*)>0 FROM fact_tip WHERE user_id is null or trim(user_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_tip WHERE business_id is null or trim(business_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_tip WHERE text is null or trim(text) = ''", False),
-
-        TestCase("SELECT  COUNT(*)>0 FROM fact_checkin WHERE business_id is null or trim(business_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_checkin WHERE timestamp is null or trim(timestamp) = ''", False),
-
-        TestCase("SELECT  COUNT(*)>0 FROM fact_friend WHERE user_id is null or trim(user_id) = ''", False),
-        TestCase("SELECT  COUNT(*)>0 FROM fact_friend WHERE friend_id is null or trim(friend_id) = ''", False),
-    ]
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
         redshift_conn_id=REDSHIFT_CONN_ID,
@@ -114,10 +82,14 @@ with DAG(DAG_NAME,
     end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
     if run_spark:
-        spark_etl = TriggerDagRunOperator(
+        spark_etl = SubDagOperator(
             task_id="yelp_spark_pipeline",
-            trigger_dag_id="yelp_spark_pipeline",
-            wait_for_completion=True,
+            subdag=create_subdag(
+                parent_dag_name=DAG_NAME,
+                child_dag_name="yelp_spark_pipeline",
+                args=default_args
+            ),
+            default_args=default_args,
             dag=dag,
         )
         start_operator >> spark_etl >> [create_tables_if_not_exist, copy_date_dim_data_to_s3]

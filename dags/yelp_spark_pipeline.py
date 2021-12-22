@@ -15,7 +15,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from common import *
 from operators.emr_get_or_create_job_flow_operator import EmrGetOrCreateJobFlowOperator
 
-terminate_cluster = False
+terminate_cluster = True
 
 EMR_CREDENTIALS_CONN_ID = Variable.get("emr_credentials_conn_id", "emr_credentials")
 
@@ -52,9 +52,6 @@ SPARK_STEPS = [
 with open('./dags/config/emr_cluster.json') as f:
     JOB_FLOW_OVERRIDES = json.load(f)
 
-
-
-
 default_args = {
     'owner': 'Roman Lukash',
     'depends_on_past': False,
@@ -64,93 +61,102 @@ default_args = {
     # 'email_on_retry': False,
 }
 
-with DAG(
-    dag_id=DAG_NAME,
-    description='Load and transform yelp\'s data using spark',
-    default_args=default_args,
-    catchup=False,
-    schedule_interval=None,
-    # max_active_runs=1
-) as dag:
 
-    start_data_pipeline = DummyOperator(task_id="start_data_pipeline", dag=dag)
+# with DAG(
+#     dag_id=DAG_NAME,
+#     description='Load and transform yelp\'s data using spark',
+#     default_args=default_args,
+#     catchup=False,
+#     schedule_interval=None,
+#     # max_active_runs=1
+# ) as dag:
+def create_subdag(parent_dag_name: str, child_dag_name, args):
+    with DAG(
+        dag_id='{0}.{1}'.format(parent_dag_name, child_dag_name),
+        description='Load and transform data using spark',
+        default_args=args,
+        catchup=False,
+        schedule_interval=None,
+        # max_active_runs=1
+    )as dag:
+        start_data_pipeline = DummyOperator(task_id="start_data_pipeline", dag=dag)
 
-    script_to_s3 = PythonOperator(
-        dag=dag,
-        task_id="copy_script_to_s3",
-        python_callable=copy_local_to_s3,
-        op_kwargs={"filename": LOCAL_SCRIPT_PATH, "key": S3_SCRIPT_KEY, },
-    )
+        script_to_s3 = PythonOperator(
+            dag=dag,
+            task_id="copy_script_to_s3",
+            python_callable=copy_local_to_s3,
+            op_kwargs={"filename": LOCAL_SCRIPT_PATH, "key": S3_SCRIPT_KEY, },
+        )
 
-    # Create an EMR cluster
-    get_or_create_emr_cluster_task_id = "get_or_create_emr_cluster"
-    get_or_create_emr_cluster = EmrGetOrCreateJobFlowOperator(
-        task_id=get_or_create_emr_cluster_task_id,
-        job_flow_overrides=JOB_FLOW_OVERRIDES,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        emr_conn_id=EMR_CREDENTIALS_CONN_ID,
-        dag=dag,
-        region_name=AWS_REGION,
-    )
+        # Create an EMR cluster
+        get_or_create_emr_cluster_task_id = "get_or_create_emr_cluster"
+        get_or_create_emr_cluster = EmrGetOrCreateJobFlowOperator(
+            task_id=get_or_create_emr_cluster_task_id,
+            job_flow_overrides=JOB_FLOW_OVERRIDES,
+            aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+            emr_conn_id=EMR_CREDENTIALS_CONN_ID,
+            dag=dag,
+            region_name=AWS_REGION,
+        )
 
+        class CustomEmrJobFlowSensor(EmrJobFlowSensor):
+            """
+            Asks for the state of the JobFlow until it reaches WAITING/RUNNING state.
+            If it fails the sensor errors, failing the task.
+            :param job_flow_id: job_flow_id to check the state of
+            :type job_flow_id: str
+            """
+            NON_TERMINAL_STATES = ['STARTING', 'BOOTSTRAPPING', 'TERMINATING']
 
-    class CustomEmrJobFlowSensor(EmrJobFlowSensor):
-        """
-        Asks for the state of the JobFlow until it reaches WAITING/RUNNING state.
-        If it fails the sensor errors, failing the task.
-        :param job_flow_id: job_flow_id to check the state of
-        :type job_flow_id: str
-        """
-        NON_TERMINAL_STATES = ['STARTING', 'BOOTSTRAPPING', 'TERMINATING']
+        job_flow_id = f"{{{{ task_instance.xcom_pull(task_ids='{get_or_create_emr_cluster_task_id}', key='return_value') }}}}"
 
+        wait_for_cluster_to_start = CustomEmrJobFlowSensor(
+            task_id="wait_for_cluster_to_start",
+            job_flow_id=job_flow_id,
+            dag=dag,
+            aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+        )
 
-    job_flow_id = f"{{{{ task_instance.xcom_pull(task_ids='{get_or_create_emr_cluster_task_id}', key='return_value') }}}}"
-
-    wait_for_cluster_to_start = CustomEmrJobFlowSensor(
-        task_id="wait_for_cluster_to_start",
-        job_flow_id=job_flow_id,
-        dag=dag,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-    )
-
-    step_adder = EmrAddStepsOperator(
-        task_id="add_steps",
-        job_flow_id=job_flow_id,
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        steps=SPARK_STEPS,
-        params={
-            "s3_bucket": S3_BUCKET,
-            "check_in_data_key": RAW_CHECK_IN_DATA_KEY,
-            "user_data_key": USERS_DATA_S3_KEY,
-            "s3_script": S3_SCRIPT_KEY,
-            "s3_output": PROCESSED_DATA_PATH,
-        },
-        dag=dag,
-    )
-
-    last_step = len(SPARK_STEPS) - 1
-    # wait for the steps to complete
-    step_checker = EmrStepSensor(
-        task_id="watch_step",
-        job_flow_id=job_flow_id,
-        step_id=f"{{{{ task_instance.xcom_pull(task_ids='add_steps', key='return_value')[{last_step}] }}}}",
-        aws_conn_id=AWS_CREDENTIALS_CONN_ID,
-        dag=dag,
-    )
-
-    end_data_pipeline = DummyOperator(task_id="end_data_pipeline", dag=dag)
-
-    start_data_pipeline >> script_to_s3 >> get_or_create_emr_cluster >> wait_for_cluster_to_start
-    wait_for_cluster_to_start >> step_adder >> step_checker
-    if terminate_cluster:
-        # Terminate the EMR cluster
-        terminate_emr_cluster = EmrTerminateJobFlowOperator(
-            task_id="terminate_emr_cluster",
+        step_adder = EmrAddStepsOperator(
+            task_id="add_steps",
             job_flow_id=job_flow_id,
             aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+            steps=SPARK_STEPS,
+            params={
+                "s3_bucket": S3_BUCKET,
+                "check_in_data_key": RAW_CHECK_IN_DATA_KEY,
+                "user_data_key": USERS_DATA_S3_KEY,
+                "s3_script": S3_SCRIPT_KEY,
+                "s3_output": PROCESSED_DATA_PATH,
+            },
             dag=dag,
-            trigger_rule="all_done"
         )
-        step_checker >> terminate_emr_cluster
-    else:
-        step_checker >> end_data_pipeline
+
+        last_step = len(SPARK_STEPS) - 1
+        # wait for the steps to complete
+        step_checker = EmrStepSensor(
+            task_id="watch_step",
+            job_flow_id=job_flow_id,
+            step_id=f"{{{{ task_instance.xcom_pull(task_ids='add_steps', key='return_value')[{last_step}] }}}}",
+            aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+            dag=dag,
+        )
+
+        end_data_pipeline = DummyOperator(task_id="end_data_pipeline", dag=dag)
+
+        start_data_pipeline >> script_to_s3 >> get_or_create_emr_cluster >> wait_for_cluster_to_start
+        wait_for_cluster_to_start >> step_adder >> step_checker
+        if terminate_cluster:
+            # Terminate the EMR cluster
+            terminate_emr_cluster = EmrTerminateJobFlowOperator(
+                task_id="terminate_emr_cluster",
+                job_flow_id=job_flow_id,
+                aws_conn_id=AWS_CREDENTIALS_CONN_ID,
+                dag=dag,
+                trigger_rule="all_done"
+            )
+            step_checker >> terminate_emr_cluster
+        else:
+            step_checker >> end_data_pipeline
+
+    return dag
