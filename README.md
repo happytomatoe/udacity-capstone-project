@@ -2,7 +2,7 @@
 
 # Description
 <p align="center">
-  <img src="https://www.pngfind.com/pngs/m/300-3008696_yelp-logo-png-transparent-png.png">
+  <img src="https://www.nicepng.com/png/detail/14-147369_yelp-logo-yelp-round-logo-png.png">
 </p>
 
 In this project the goal is to build data warehouse tables that later can be used for EDA.  
