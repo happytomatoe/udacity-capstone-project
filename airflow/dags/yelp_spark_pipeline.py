@@ -23,7 +23,7 @@ AWS_REGION = Variable.get("aws_region", "us-west-2")
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
 # Configurations
-LOCAL_SCRIPT_PATH = "./dags/scripts/etl.py"
+LOCAL_SCRIPT_PATH = f"{CURRENT_PATH}/scripts/etl.py"
 S3_SCRIPT_KEY = "scripts/etl.py"
 
 SPARK_STEPS = [

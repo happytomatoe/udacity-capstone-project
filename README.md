@@ -76,6 +76,5 @@ TODO:
     "region_name": "us-east-1"
    }   
     ```
-   2) emr_credentials. Just copy aws_credentials with extra field.
-   3) redshift. Select connection type - Postgres 
-2) 
+   2) emr_credentials. Just copy aws_credentials without extra field.
+   3) redshift. Select connection type - Postgres, and populate other details

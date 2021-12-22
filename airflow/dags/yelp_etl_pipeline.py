@@ -44,13 +44,12 @@ with DAG(DAG_NAME,
         postgres_conn_id=REDSHIFT_CONN_ID,
         sql="sql/create_schema.sql",
     )
-
     dim_date_data_s3_key = f"{RAW_DATA_PATH}/{DIM_DATE_DATA_FILE_NAME}"
     copy_date_dim_data_to_s3 = PythonOperator(
         dag=dag,
         task_id="copy_date_dim_data_to_s3",
         python_callable=copy_local_to_s3,
-        op_kwargs={"filename": f"./dags/data/{DIM_DATE_DATA_FILE_NAME}", "key": dim_date_data_s3_key, },
+        op_kwargs={"filename": f"{CURRENT_PATH}/data/{DIM_DATE_DATA_FILE_NAME}", "key": dim_date_data_s3_key, },
     )
 
     populate_date_dimension_if_empty = PopulateTableOperator(

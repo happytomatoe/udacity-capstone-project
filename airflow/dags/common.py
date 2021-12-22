@@ -1,3 +1,5 @@
+import os
+
 from airflow.hooks.S3_hook import S3Hook
 from airflow.models import Variable
 
@@ -19,6 +21,8 @@ RAW_CHECK_IN_DATA_KEY = Variable.get("raw_check_in_data_s3_key", f"{RAW_DATA_PAT
 
 PROCESSED_CHECK_IN_DATA_S3_KEY = Variable.get("processed_check_in_data_s3_key", f"{PROCESSED_DATA_PATH}/check-ins/")
 FRIEND_DATA_S3_KEY = Variable.get("friend_data_s3_key", f"{PROCESSED_DATA_PATH}/friends/")
+
+CURRENT_PATH = os.path.dirname(__file__)
 
 
 # helper function
