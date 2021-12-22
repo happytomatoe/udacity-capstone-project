@@ -1,10 +1,9 @@
 # Yelp ETL Pipeline
-
-# Description
 <p align="center">
   <img src="https://www.pngitem.com/pimgs/m/109-1098173_transparent-yelp-logo-hd-png-download.png">
 </p>
 
+# Description
 In this project the goal is to build data warehouse tables that later can be used for EDA.  
 
 
