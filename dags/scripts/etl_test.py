@@ -58,7 +58,7 @@ def test_friends_transformation(spark):
     users = [
         {"user_id": "id1", "name": "Jack", "friends": "id2, id3"},
         {"user_id": "id2", "name": "Jane", "friends": "id1, id3"},
-        {"user_id": "id3", "name": "Jane", "friends": "id1, id2"},
+        {"user_id": "id3", "name": "Jane", "friends": "id1, id2, id5"},
     ]
     expected = [
         {"user_id": "id1", "friend_id": "id2"},

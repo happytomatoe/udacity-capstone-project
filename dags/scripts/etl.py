@@ -22,7 +22,6 @@ def _transform_checkins_inner(df):
 def _create_friends(input_loc, output_loc):
     """
         Creates user-friend relation by unnesting friend field
-        Also filters out friends that are not registered in the dataset
     """
     df = spark.read.json(input_loc)
     df.cache()

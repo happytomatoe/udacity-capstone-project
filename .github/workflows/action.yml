@@ -22,7 +22,6 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
-#       Adapter from https://github.com/actions/setup-python
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
@@ -38,15 +37,3 @@ jobs:
         run: |
           make create-venv
           make test
-      - name: Send email if failed
-        uses: dawidd6/action-send-mail@v2.4.0
-        if: ${{ failure() }}
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{secrets.MAIL_USERNAME}}
-          password: ${{secrets.MAIL_PASSWORD}}
-          subject: Github Actions job failed
-          to: ${{secrets.TO_EMAIL}}
-          from: ${{secrets.FROM_EMAIL}}
-          body: More details https://github.com/happytomatoe/data-modeling-with-postgres/actions
