@@ -16,18 +16,33 @@ Information about businesses covers 8 metropolitan areas in the USA and Canada.
 # Architecture
 ![img.png](docs/architecture.png)
 
+## Overview
 
-# ETL flow
+
+## ETL flow
+- Spark job transforms data using s3
+- Warehouse schema is created 
+- Date dimension is created and populated
+- Staging area is populated
+- The rest of the dimension tables are populated
+- Fact tables are populated
+- Data quality checks are run
+
+
 Airflow dag:
 ![img.png](docs/dag.png)
 Spark subdag:
 ![img.png](docs/spark_subdag.png)
 
-
 ## Project structure
 
 
 ## Data warehouse schema
+![img.png](docs/datawehouse_schema.png)
+
+
+# Environment Setup
+
 
 
 # Instructions
