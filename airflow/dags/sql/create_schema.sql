@@ -13,19 +13,42 @@ CREATE TABLE IF NOT EXISTS "dim_date"
     year    int2
 );
 
+comment on column dim_date.date_id is 'date key';
+comment on column dim_date.date is 'regular date';
+comment on column dim_date.day is 'day of month';
+comment on column dim_date.week is 'week number in the month';
+comment on column dim_date.weekday is 'day of the week';
+comment on column dim_date.weekday is 'month number. 0 - Monday, 6 - Sunday';
+comment on column dim_date.quarter is 'quarter in a year';
+comment on column dim_date.year is 'year number';
+
+
+
 CREATE TABLE IF NOT EXISTS "dim_user"
 (
     "user_id"               char(22) PRIMARY KEY distkey sortkey,
     "name"                  text NOT NULL,
     "yelping_since"         timestamp,
     "yelping_since_date_id" int4 references dim_date,
-    review_count            int4,
+    "review_count"            int4,
     "usefull"               int4,
     "funny"                 int4,
     "cool"                  int4,
     "fans"                  int4,
     "avg_stars"             int4
 );
+
+comment on column dim_user.user_id is 'unique user id';
+comment on column dim_user.name is 'the user''s first name';
+comment on column dim_user.yelping_since is 'when the user joined Yelp';
+comment on column dim_user.yelping_since_date_id is 'FK to date dimension';
+comment on column dim_user.review_count is 'the number of reviews they''ve written';
+comment on column dim_user.usefull is 'number of useful votes sent by the user';
+comment on column dim_user.funny is 'number of funny votes sent by the user';
+comment on column dim_user.cool is 'number of cool votes sent by the user';
+comment on column dim_user.fans is 'number of fans the user has';
+comment on column dim_user.avg_stars is 'average rating of all reviews';
+
 
 CREATE TABLE IF NOT EXISTS "dim_business"
 (
@@ -41,6 +64,18 @@ CREATE TABLE IF NOT EXISTS "dim_business"
     "review_count" int4,
     "is_open"      boolean
 );
+
+comment on column dim_business.business_id is 'unique business id';
+comment on column dim_business.name is 'the business''s name';
+comment on column dim_business.address is 'the full address of the business';
+comment on column dim_business.city is 'the city';
+comment on column dim_business.state is 'state code, if applicable';
+comment on column dim_business.postal_code is 'the postal code';
+comment on column dim_business.latitude is 'latitude';
+comment on column dim_business.longitude is 'longitude';
+comment on column dim_business.stars is 'star rating, rounded to half-stars';
+comment on column dim_business.review_count is 'number of reviews';
+comment on column dim_business.is_open is '0 or 1 for closed or open, respectively';
 
 
 -- ------------------------------------------------------FACTS ---
@@ -58,6 +93,16 @@ CREATE TABLE IF NOT EXISTS "fact_review"
     "cool"        int4
 ) INTERLEAVED SORTKEY (review_id,user_id,business_id,date_id);
 
+comment on column fact_review.review_id is 'unique review id';
+comment on column fact_review.user_id is 'FK to the user dimension';
+comment on column fact_review.business_id is 'FK to the business dimension';
+comment on column fact_review.stars is 'star rating';
+comment on column fact_review.date_id is 'FK to the date dimension';
+comment on column fact_review.text is 'the review itself';
+comment on column fact_review.usefull is 'number of useful votes received';
+comment on column fact_review.funny is 'number of funny votes received';
+comment on column fact_review.cool is 'number of cool votes received';
+
 
 CREATE TABLE IF NOT EXISTS "fact_business_category"
 (
@@ -65,8 +110,9 @@ CREATE TABLE IF NOT EXISTS "fact_business_category"
     "business_id" char(22) references dim_business NOT NULL distkey sortkey
 );
 
--- tips
--- {"user_id":"sNVpZLDSlCudlXLsnJpg7A","business_id":"Wqetc51pFQzz04SXh_AORA","text":"So busy...","date":"2014-06-07 12:09:55","compliment_count":0}
+comment on column fact_business_category.category is 'business category';
+comment on column fact_business_category.business_id is 'business id';
+
 
 CREATE TABLE IF NOT EXISTS fact_tip
 (
@@ -76,9 +122,11 @@ CREATE TABLE IF NOT EXISTS fact_tip
     compliment_count int2
 ) INTERLEAVED SORTKEY (user_id, business_id);
 
--- checkins
--- {"business_id":"--0zrn43LEaB4jUWTQH_Bg","date":"2010-10-08 22:21:20, 2010-11-01 21:29:14, 2010-12-23 22:55:45,
--- 2011-04-08 17:14:59, 2011-04-11 21:28:45, 2011-04-26 16:42:25, 2011-05-20 19:30:57, 2011-05-24 20:02:21, 2011-08-29 19:01:31"}
+comment on column fact_tip.user_id is 'FK to the user dimension';
+comment on column fact_tip.business_id is 'FK to the business dimension';
+comment on column fact_tip.text is 'text of the tip';
+comment on column fact_tip.compliment_count is 'how many compliments the tip has';
+
 
 CREATE TABLE IF NOT EXISTS "fact_checkin"
 (
@@ -87,12 +135,19 @@ CREATE TABLE IF NOT EXISTS "fact_checkin"
     "date_id"     int4 references dim_date
 );
 
+comment on column fact_checkin.business_id is 'FK to the business dimension';
+comment on column fact_checkin.timestamp is 'check-in time';
+comment on column fact_checkin.date_id is 'date key which points to date based on truncating the timestamp';
+
 
 CREATE TABLE IF NOT EXISTS "fact_friend"
 (
     "user_id"   char(22) references dim_user NOT NULL,
     "friend_id" char(22) references dim_user NOT NULL
 );
+
+comment on column fact_friend.user_id is 'FK to the user dimension';
+comment on column fact_friend.friend_id is 'FK to the user dimension which represents friend role';
 
 
 ------------------------------------------------------------ STAGING ---
