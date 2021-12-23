@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS "dim_user"
     "name"                  text NOT NULL,
     "yelping_since"         timestamp,
     "yelping_since_date_id" int4 references dim_date,
-    "review_count"            int4,
+    "review_count"          int4,
     "usefull"               int4,
     "funny"                 int4,
     "cool"                  int4,

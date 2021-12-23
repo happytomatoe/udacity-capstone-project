@@ -1,0 +1,52 @@
++----------------------+------+---------------------+------------------------------+--------+---------------------------------------------------------------+------------------+
+|table_name            |is_key|column_name          |data_type                     |nullable|column_description                                             |source            |
++----------------------+------+---------------------+------------------------------+--------+---------------------------------------------------------------+------------------+
+|dim_business          |PK    |business_id          |character(22)                 |NOT NULL|unique business id                                             |business.json     |
+|dim_business          |      |name                 |text                          |NOT NULL|the business's name                                            |business.json     |
+|dim_business          |      |address              |text                          |NULL    |the full address of the business                               |business.json     |
+|dim_business          |      |city                 |text                          |NULL    |the city                                                       |business.json     |
+|dim_business          |      |state                |character varying(3)          |NULL    |state code, if applicable                                      |business.json     |
+|dim_business          |      |postal_code          |character varying(32)         |NULL    |the postal code                                                |business.json     |
+|dim_business          |      |latitude             |double precision(53)          |NULL    |latitude                                                       |business.json     |
+|dim_business          |      |longitude            |double precision(53)          |NULL    |longitude                                                      |business.json     |
+|dim_business          |      |stars                |real(24)                      |NULL    |star rating, rounded to half-stars                             |business.json     |
+|dim_business          |      |review_count         |integer(32)                   |NULL    |number of reviews                                              |business.json     |
+|dim_business          |      |is_open              |boolean                       |NULL    |0 or 1 for closed or open, respectively                        |business.json     |
+|dim_date              |PK    |date_id              |integer(32)                   |NOT NULL|date key                                                       |manually generated|
+|dim_date              |      |date                 |date(3)                       |NULL    |regular date                                                   |manually generated|
+|dim_date              |      |day                  |smallint(16)                  |NULL    |day of month                                                   |manually generated|
+|dim_date              |      |week                 |smallint(16)                  |NULL    |week number in the month                                       |manually generated|
+|dim_date              |      |weekday              |smallint(16)                  |NULL    |month number. 0 - Monday, 6 - Sunday                           |manually generated|
+|dim_date              |      |quarter              |smallint(16)                  |NULL    |quarter in a year                                              |manually generated|
+|dim_date              |      |year                 |smallint(16)                  |NULL    |year number                                                    |manually generated|
+|dim_user              |PK    |user_id              |character(22)                 |NOT NULL|unique user id                                                 |manually generated|
+|dim_user              |      |name                 |text                          |NOT NULL|the user's first name                                          |manually generated|
+|dim_user              |      |yelping_since        |timestamp without time zone(6)|NULL    |when the user joined Yelp                                      |user.json         |
+|dim_user              |FK    |yelping_since_date_id|integer(32)                   |NULL    |FK to date dimension                                           |user.json         |
+|dim_user              |      |review_count         |integer(32)                   |NULL    |the number of reviews they've written                          |user.json         |
+|dim_user              |      |usefull              |integer(32)                   |NULL    |number of useful votes sent by the user                        |user.json         |
+|dim_user              |      |funny                |integer(32)                   |NULL    |number of funny votes sent by the user                         |user.json         |
+|dim_user              |      |cool                 |integer(32)                   |NULL    |number of cool votes sent by the user                          |user.json         |
+|dim_user              |      |fans                 |integer(32)                   |NULL    |number of fans the user has                                    |user.json         |
+|dim_user              |      |avg_stars            |integer(32)                   |NULL    |average rating of all reviews                                  |user.json         |
+|fact_business_category|      |category             |text                          |NOT NULL|business category                                              |business.json     |
+|fact_business_category|FK    |business_id          |character(22)                 |NOT NULL|business id                                                    |business.json     |
+|fact_checkin          |FK    |business_id          |character(22)                 |NOT NULL|FK to the business dimension                                   |checkin.json      |
+|fact_checkin          |      |timestamp            |timestamp without time zone(6)|NOT NULL|check-in time                                                  |checkin.json      |
+|fact_checkin          |FK    |date_id              |integer(32)                   |NULL    |date key which points to date based on truncating the timestamp|timestamp         |
+|fact_friend           |FK    |user_id              |character(22)                 |NOT NULL|FK to the user dimension                                       |user.json         |
+|fact_friend           |FK    |friend_id            |character(22)                 |NOT NULL|FK to the user dimension which represents friend role          |user.json         |
+|fact_review           |PK    |review_id            |character(22)                 |NOT NULL|unique review id                                               |review.json       |
+|fact_review           |FK    |user_id              |character(22)                 |NOT NULL|FK to the user dimension                                       |review.json       |
+|fact_review           |FK    |business_id          |character(22)                 |NOT NULL|FK to the business dimension                                   |review.json       |
+|fact_review           |      |stars                |smallint(16)                  |NOT NULL|star rating                                                    |review.json       |
+|fact_review           |FK    |date_id              |integer(32)                   |NOT NULL|FK to the date dimension                                       |review.json       |
+|fact_review           |      |text                 |character varying(5000)       |NOT NULL|the review itself                                              |review.json       |
+|fact_review           |      |usefull              |integer(32)                   |NULL    |number of useful votes received                                |review.json       |
+|fact_review           |      |funny                |integer(32)                   |NULL    |number of funny votes received                                 |review.json       |
+|fact_review           |      |cool                 |integer(32)                   |NULL    |number of cool votes received                                  |review.json       |
+|fact_tip              |FK    |user_id              |character(22)                 |NOT NULL|FK to the user dimension                                       |tip.json          |
+|fact_tip              |FK    |business_id          |character(22)                 |NOT NULL|FK to the business dimension                                   |tip.json          |
+|fact_tip              |      |text                 |character varying(5000)       |NOT NULL|text of the tip                                                |tip.json          |
+|fact_tip              |      |compliment_count     |smallint(16)                  |NULL    |how many compliments the tip has                               |tip.json          |
++----------------------+------+---------------------+------------------------------+--------+---------------------------------------------------------------+------------------+

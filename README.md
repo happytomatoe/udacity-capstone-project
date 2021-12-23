@@ -40,6 +40,7 @@ Spark subdag:
 ## Data warehouse schema
 ![img.png](docs/datawehouse_schema.png)
 
+Data dictionary is included in the [data dictionary](data_dictionary.txt)
 
 # Environment Setup
 
