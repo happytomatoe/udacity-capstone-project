@@ -11,7 +11,7 @@ In this project the goal is to build data warehouse tables that later can be use
 In this project this dataset was used - https://www.kaggle.com/yelp-dataset/yelp-dataset.<br>
 The dataset contains 8,635,403 reviews, 160,585 businesses, 1,162,119 tips by 2,189,457 users.<br> 
 Aggregated check-ins over time for each of the 138,876 businesses. <br>
-Information about businesses across 8 metropolitan areas in the USA and Canada.
+Information about businesses covers 8 metropolitan areas in the USA and Canada.
 
 # Architecture
 ![img.png](docs/architecture.png)
