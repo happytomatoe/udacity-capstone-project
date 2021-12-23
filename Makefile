@@ -100,6 +100,3 @@ doc: venv
 clean:
 	rm -rf venv
 	find -iname "*.pyc" -delete
-
-etl: venv
-	./venv/bin/spark-submit src/etl.py
