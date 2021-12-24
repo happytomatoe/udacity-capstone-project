@@ -13,9 +13,12 @@ from airflow.operators.dummy_operator import DummyOperator
 from common import *
 from operators.emr_get_or_create_job_flow_operator import EmrGetOrCreateJobFlowOperator
 
+
+# Next variable is created for testing purposes
 terminate_cluster = True
 
 EMR_CREDENTIALS_CONN_ID = Variable.get("emr_credentials_conn_id", "emr_credentials")
+EMR_LOG_URI = Variable.get("emr_log_uri", "")
 
 AWS_REGION = Variable.get("aws_region", "us-west-2")
 DAG_NAME = os.path.basename(__file__).replace('.py', '')
@@ -44,7 +47,7 @@ SPARK_STEPS = [
 JOB_FLOW_OVERRIDES = {
     "Name": "Yelp ETL",
     "ReleaseLabel": "emr-5.33.1",
-    "LogUri": "s3n://aws-emr-resources-508278446598-us-west-2/",
+    "LogUri": f"{EMR_LOG_URI}",
     "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}],
     "Configurations": [
         {

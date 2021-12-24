@@ -1,13 +1,12 @@
-import os
 from datetime import datetime, timedelta
 from textwrap import dedent
 
-from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.subdag_operator import SubDagOperator
 
+from airflow import DAG
 from common import *
 from operators import DataQualityOperator, PopulateTableOperator
 from task_groups import create_staging_tasks, create_load_dimension_tasks, create_load_facts_tasks
@@ -18,6 +17,7 @@ DAG_NAME = os.path.basename(__file__).replace('.py', '')
 
 DIM_DATE_DATA_FILE_NAME = "dim_date.csv"
 
+# Next variables are created for testing purposes
 enable_staging = True
 run_spark = True
 

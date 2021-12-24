@@ -196,23 +196,12 @@ CREATE TABLE IF NOT EXISTS staging_businesses
 );
 
 
-
--- checkins
--- {"business_id":"--0zrn43LEaB4jUWTQH_Bg","date":"2010-10-08 22:21:20, 2010-11-01 21:29:14, 2010-12-23 22:55:45,
--- 2011-04-08 17:14:59, 2011-04-11 21:28:45, 2011-04-26 16:42:25, 2011-05-20 19:30:57, 2011-05-24 20:02:21, 2011-08-29 19:01:31"}
-
 CREATE TABLE IF NOT EXISTS staging_checkins
 (
     business_id char(22),
     date        timestamp
 );
 
--- tips
--- {"user_id":"sNVpZLDSlCudlXLsnJpg7A","
--- business_id":"Wqetc51pFQzz04SXh_AORA",
--- "text":"So busy...",
--- "date":"2014-06-07 12:09:55",
--- "compliment_count":0}
 
 CREATE TABLE IF NOT EXISTS staging_tips
 (
