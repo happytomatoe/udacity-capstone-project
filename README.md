@@ -15,10 +15,9 @@ able to give an answer to questions like:
 - Find top businesses by location
 - Find top business in the category
 - Get top users by review count
-- Find local experts
 - Show how many customers check in based on date
 - Check-ins distribution
-- Most used words in the tips
+- Show most used words in the tips
 
 # Data Source
 
@@ -87,13 +86,13 @@ EBS Storage:64 GiB
 ```
 This configuration is located in [the spark subdag file](airflow/dags/yelp_spark_pipeline.py)
 
-Redshift: Currently I spawn redshift cluster with 2 dc2.large instances
+Redshift - Currently I spawn redshift cluster with 2 dc2.large instances
 
 ### Setting up Airflow
 
 Currently, this project was tested with airflow 1.10.15. AWS provides an option to deploy managed 
 airflow instance or this project can be used with standalone airflow application. This project contains 
-docker-compose file to spin up airflow stack. 
+docker-compose file to spin up an airflow stack. 
 
 After starting airflow you should be able to see the dag
 ![img.png](docs/dag.png)
@@ -153,15 +152,6 @@ If the roles not present, create them using the following command
 aws emr create-default-roles
 ```
 
-# Instructions
-## Step 5: Complete Project Write Up
-What's the goal? What queries will you want to run? How would Spark or 
-Airflow be incorporated? Why did you choose the model you chose?
-Clearly state the rationale for the choice of tools and technologies for the project.
-Document the steps of the process.
-Propose how often the data should be updated and why.
-Post your write-up and final data model in a GitHub repo.
-
 # Scenarios
 - If the data was increased by 100x <br>
 
@@ -186,7 +176,9 @@ Currently, pipeline is build as one time job. To support continuous DML changes 
 4) If needed enable catch up flag
 5) it would also make sense to change existing logic and add some timeout for current airflow tasks
 - If the database needed to be accessed by 100+ people
-There is a limitation for redshift - each user defined queue can handle maximum 50 concurrent queries. 
+
+As there is a limitation for redshift - each user defined queue can handle maximum 50 concurrent queries next steps 
+should increase cluster throughput 
 
 1) set up  queues/query priorities/query groups in workload manager
 2) enable concurrency scaling feature for queues which can have spikes in load
