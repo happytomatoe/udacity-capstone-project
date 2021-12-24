@@ -14,6 +14,7 @@ class EmrGetOrCreateJobFlowOperator(EmrCreateJobFlowOperator):
         :param job_flow_overrides – boto3 style arguments to override emr_connection extra. (templated)
         :param job_flow_overrides: dict
     """
+
     @apply_defaults
     def __init__(
             self,

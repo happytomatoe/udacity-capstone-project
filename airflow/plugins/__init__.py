@@ -6,6 +6,7 @@ import helpers
 from operators import PopulateTableOperator, StageToRedshiftOperator, LoadFactOperator, LoadDimensionOperator, \
     DataQualityOperator
 
+
 # Fixes bug when airflow cannot import operator using airflow.operators package
 class populate_table_operator(PopulateTableOperator):
     pass

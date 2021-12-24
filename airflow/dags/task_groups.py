@@ -16,7 +16,7 @@ def create_staging_tasks(dag: DAG):
     stage_businesses = StageToRedshiftOperator(
         task_id='stage_businesses',
         s3_bucket=S3_BUCKET,
-        s3_key=BUSINESS_DATA_S3_KEY,
+        s3_key=RAW_BUSINESS_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_businesses",
         redshift_conn_id=REDSHIFT_CONN_ID,
@@ -33,14 +33,14 @@ def create_staging_tasks(dag: DAG):
     stage_users = StageToRedshiftOperator(
         task_id='stage_users',
         s3_bucket=S3_BUCKET,
-        s3_key=USERS_DATA_S3_KEY,
+        s3_key=PROCESSED_USERS_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_users",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
+            FORMAT AS CSV 
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
@@ -50,14 +50,14 @@ def create_staging_tasks(dag: DAG):
     stage_reviews = StageToRedshiftOperator(
         task_id='stage_reviews',
         s3_bucket=S3_BUCKET,
-        s3_key=REVIEWS_DATA_S3_KEY,
+        s3_key=PROCESSED_REVIEWS_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_reviews",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS JSON 'auto ignorecase'
+            FORMAT AS CSV 
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
@@ -67,7 +67,7 @@ def create_staging_tasks(dag: DAG):
     stage_tips = StageToRedshiftOperator(
         task_id='stage_tips',
         s3_bucket=S3_BUCKET,
-        s3_key=TIP_DATA_S3_KEY,
+        s3_key=RAW_TIP_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_tips",
         redshift_conn_id=REDSHIFT_CONN_ID,
@@ -101,7 +101,7 @@ def create_staging_tasks(dag: DAG):
     stage_friends = StageToRedshiftOperator(
         task_id='stage_friends',
         s3_bucket=S3_BUCKET,
-        s3_key=FRIEND_DATA_S3_KEY,
+        s3_key=PROCESSED_FRIEND_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_friends",
         redshift_conn_id=REDSHIFT_CONN_ID,

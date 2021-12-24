@@ -11,19 +11,22 @@ REDSHIFT_CONN_ID = Variable.get("redshift_conn_id", "redshift")
 AWS_CREDENTIALS_CONN_ID = Variable.get("aws_credentials_conn_id", "aws_credentials")
 TABLES_SCHEMA = Variable.get("redshift_schema", "public")
 
-S3_BUCKET = Variable.get("s3_bucket", "udacity-data-modelling")
+S3_BUCKET = Variable.get("s3_bucket")
 
 RAW_DATA_PATH = "data/raw"
 PROCESSED_DATA_PATH = "data/processed"
 
-BUSINESS_DATA_S3_KEY = Variable.get("business_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_business.json")
-USERS_DATA_S3_KEY = Variable.get("users_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_user.json")
-REVIEWS_DATA_S3_KEY = Variable.get("reviews_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_review.json")
-TIP_DATA_S3_KEY = Variable.get("tip_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_tip.json")
+RAW_BUSINESS_DATA_S3_KEY = Variable.get("raw_business_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_business.json")
+RAW_REVIEWS_DATA_S3_KEY = Variable.get("raw_reviews_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_review.json")
+RAW_TIP_DATA_S3_KEY = Variable.get("raw_tip_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_tip.json")
 RAW_CHECK_IN_DATA_KEY = Variable.get("raw_check_in_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_checkin.json")
+RAW_USERS_DATA_KEY = Variable.get("raw_check_in_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_user.json")
 
+
+PROCESSED_USERS_DATA_S3_KEY = Variable.get("processed_users_data_s3_key", f"{PROCESSED_DATA_PATH}/users/")
+PROCESSED_REVIEWS_DATA_S3_KEY = Variable.get("processed_reviews_data_s3_key", f"{PROCESSED_DATA_PATH}/reviews/")
 PROCESSED_CHECK_IN_DATA_S3_KEY = Variable.get("processed_check_in_data_s3_key", f"{PROCESSED_DATA_PATH}/check-ins/")
-FRIEND_DATA_S3_KEY = Variable.get("friend_data_s3_key", f"{PROCESSED_DATA_PATH}/friends/")
+PROCESSED_FRIEND_DATA_S3_KEY = Variable.get("processed_friend_data_s3_key", f"{PROCESSED_DATA_PATH}/friends/")
 
 CURRENT_PATH = os.path.dirname(__file__)
 

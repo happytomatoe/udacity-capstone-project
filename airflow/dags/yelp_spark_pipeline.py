@@ -13,9 +13,8 @@ from airflow.operators.dummy_operator import DummyOperator
 from common import *
 from operators.emr_get_or_create_job_flow_operator import EmrGetOrCreateJobFlowOperator
 
-
 # Next variable is created for testing purposes
-terminate_cluster = True
+terminate_cluster = False
 
 EMR_CREDENTIALS_CONN_ID = Variable.get("emr_credentials_conn_id", "emr_credentials")
 EMR_LOG_URI = Variable.get("emr_log_uri", "")
@@ -35,17 +34,23 @@ SPARK_STEPS = [
             "Jar": "command-runner.jar",
             "Args": [
                 "spark-submit",
+                "--deploy-mode",
+                "client",
                 "s3://{{ params.s3_bucket }}/{{ params.s3_script }}",
-                "--check-ins-input-path", "s3://{{ params.s3_bucket }}/{{params.check_in_data_key}}",
-                "--users-input-path", "s3://{{ params.s3_bucket }}/{{ params.user_data_key }}",
-                "--output", "s3a://{{ params.s3_bucket }}/{{ params.s3_output}}",
+                "--check-ins-input-path", "s3://{{ params.s3_bucket }}/{{params.raw_check_in_data_key}}",
+                "--check-ins-output-path", "s3://{{ params.s3_bucket }}/{{params.processed_check_in_data_key}}",
+                "--users-input-path", "s3://{{ params.s3_bucket }}/{{ params.raw_user_data_key }}",
+                "--users-output-path", "s3://{{ params.s3_bucket }}/{{ params.processed_user_data_key }}",
+                "--friends-output-path", "s3://{{ params.s3_bucket }}/{{ params.processed_friend_data_key }}",
+                "--reviews-input-path", "s3://{{ params.s3_bucket }}/{{ params.raw_review_data_key }}",
+                "--reviews-output-path", "s3://{{ params.s3_bucket }}/{{ params.processed_review_data_key }}",
             ],
         },
     },
 ]
 
 JOB_FLOW_OVERRIDES = {
-    "Name": "Yelp ETL",
+    "Name": "My cluster",
     "ReleaseLabel": "emr-5.33.1",
     "LogUri": f"{EMR_LOG_URI}",
     "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}],
@@ -65,13 +70,13 @@ JOB_FLOW_OVERRIDES = {
         "InstanceGroups": [
             {
                 "Name": "Master node",
-                "Market": "SPOT",
+                "Market": "ON_DEMAND",
                 "InstanceRole": "MASTER",
                 "InstanceType": "m5.xlarge",
                 "InstanceCount": 1
             }, {
                 "Name": "Core - 2",
-                "Market": "SPOT",
+                "Market": "ON_DEMAND",
                 "InstanceRole": "CORE",
                 "InstanceType": "m5.xlarge",
                 "InstanceCount": 2
@@ -88,8 +93,8 @@ default_args = {
     'owner': 'Roman Lukash',
     'depends_on_past': False,
     'start_date': datetime(2018, 11, 1),
-    'retries': 5,
-    'retry_delay': timedelta(minutes=2),
+    # 'retries': 5,
+    # 'retry_delay': timedelta(minutes=2),
     'email_on_retry': False,
 }
 
@@ -149,16 +154,20 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
             steps=SPARK_STEPS,
             params={
                 "s3_bucket": S3_BUCKET,
-                "check_in_data_key": RAW_CHECK_IN_DATA_KEY,
-                "user_data_key": USERS_DATA_S3_KEY,
+                "raw_check_in_data_key": RAW_CHECK_IN_DATA_KEY,
+                "processed_check_in_data_key": PROCESSED_CHECK_IN_DATA_S3_KEY,
+                "raw_user_data_key": RAW_USERS_DATA_KEY,
+                "processed_user_data_key": PROCESSED_USERS_DATA_S3_KEY,
+                "processed_friend_data_key": PROCESSED_FRIEND_DATA_S3_KEY,
+                "raw_review_data_key": RAW_REVIEWS_DATA_S3_KEY,
+                "processed_review_data_key": PROCESSED_REVIEWS_DATA_S3_KEY,
                 "s3_script": S3_SCRIPT_KEY,
-                "s3_output": PROCESSED_DATA_PATH,
             },
             dag=dag,
         )
 
         last_step = len(SPARK_STEPS) - 1
-        
+
         wait_for_step_to_complete = EmrStepSensor(
             task_id="wait_for_step_to_complete",
             job_flow_id=job_flow_id,
@@ -172,7 +181,7 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
         start_data_pipeline >> script_to_s3 >> get_or_create_emr_cluster >> wait_for_cluster_to_start
         wait_for_cluster_to_start >> step_adder >> wait_for_step_to_complete
         if terminate_cluster:
-            
+
             terminate_emr_cluster = EmrTerminateJobFlowOperator(
                 task_id="terminate_emr_cluster",
                 job_flow_id=job_flow_id,

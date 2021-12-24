@@ -35,7 +35,7 @@ with DAG(DAG_NAME,
          description='Load and transform data in Redshift with Airflow',
          catchup=False,
          schedule_interval=None,
-         max_active_runs=1,
+         # max_active_runs=1,
          ) as dag:
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 

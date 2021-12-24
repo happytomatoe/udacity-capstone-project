@@ -1,4 +1,5 @@
 import findspark
+
 findspark.init()
 
 from chispa import assert_df_equality
@@ -73,4 +74,3 @@ def test_friends_transformation(spark):
 
     expected = spark.read.json(spark.sparkContext.parallelize([expected]))
     assert_df_equality(expected, actual, ignore_column_order=True, ignore_row_order=True)
-

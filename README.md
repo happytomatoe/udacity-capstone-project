@@ -21,7 +21,7 @@ able to give an answer to questions like:
 
 # Data Source
 
-In this project this dataset was used - https://www.kaggle.com/yelp-dataset/yelp-dataset.<br>
+In this project this dataset was used - https://www.kaggle.com/yelp-dataset/yelp-dataset. <br>
 The dataset contains 8,635,403 reviews, 160,585 businesses, 1,162,119 tips by 2,189,457 users.<br> 
 Aggregated check-ins over time for each of the 138,876 businesses. <br>
 Information about businesses covers 8 metropolitan areas in the USA and Canada.
