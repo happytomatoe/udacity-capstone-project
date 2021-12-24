@@ -18,8 +18,8 @@ DAG_NAME = os.path.basename(__file__).replace('.py', '')
 DIM_DATE_DATA_FILE_NAME = "dim_date.csv"
 
 # Next variables are created for testing purposes
-enable_staging = True
-run_spark = True
+enable_staging = False
+run_spark = False
 
 default_args = {
     'owner': 'Roman Lukash',

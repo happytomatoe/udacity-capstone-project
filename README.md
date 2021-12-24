@@ -17,7 +17,6 @@ able to give an answer to questions like:
 - Get top users by review count
 - Show how many customers check in based on date
 - Check-ins distribution
-- Show most used words in the tips
 
 # Data Source
 
@@ -183,6 +182,26 @@ should increase cluster throughput
 1) set up  queues/query priorities/query groups in workload manager
 2) enable concurrency scaling feature for queues which can have spikes in load
 3) change max concurrency scaling parameter 
- 
 
+# EDA
+Let's try to answer the questions that was described in the goal section. As the new redshift 
+query edit has a feature to draw charts let's use that.
 
+- Rating distribution
+![](docs/rating_distribution.png)
+- Show number of businesses by category
+![](docs/num_businesses_by_category.png)
+- Show number of businesses by state, city
+![](docs/num_businesses_by_state_city.png)
+- Find top businesses in the city in the city Orlando
+- ![](docs/top_businesses_in_orlando.png)
+- Show how review count grows per selected business by time for the top business in the city Orlando
+![](docs/cafe_tu_tango_num_of_reviews_per_year.png)
+- Customer satisfaction changes over period of time for selected business
+![](docs/avg_customer_satisfaction.png)
+- Get top users by review count
+![](docs/top_user_by_review_count.png)
+- Show how many customers check in based on time of day for top business in Orlando from 2018-2020
+![](docs/customer_check_in_count_based_on_time_of_day.png)
+- Check-ins distribution by day of week
+![](docs/check_in_distribution.png)

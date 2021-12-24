@@ -13,11 +13,14 @@ test_cases = [
     TestCase("SELECT  COUNT(*)>0 FROM dim_business", True),
     TestCase("SELECT  COUNT(*)>0 FROM dim_user", True),
     # Individual checks
+
+    TestCase("SELECT COUNT(*)>0 FROM(SELECT user_id FROM dim_user GROUP BY user_id HAVING COUNT(*)>1) n", False),
     TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE name is null or trim(name) = ''", False),
     TestCase("SELECT  COUNT(*)>0 FROM dim_user WHERE user_id is null", False),
     TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE business_id is null", False),
     TestCase("SELECT  COUNT(*)>0 FROM dim_business WHERE name is null or trim(name) = ''", False),
 
+    TestCase("SELECT COUNT(*)>0 FROM(SELECT review_id FROM fact_review GROUP BY review_id HAVING COUNT(*)>1) n", False),
     TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE review_id is null or trim(review_id) = ''", False),
     TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE user_id is null or trim(user_id) = ''", False),
     TestCase("SELECT  COUNT(*)>0 FROM fact_review WHERE business_id is null or trim(business_id) = ''", False),

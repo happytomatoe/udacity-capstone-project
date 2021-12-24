@@ -40,10 +40,7 @@ SPARK_STEPS = [
                 "--check-ins-input-path", "s3://{{ params.s3_bucket }}/{{params.raw_check_in_data_key}}",
                 "--check-ins-output-path", "s3://{{ params.s3_bucket }}/{{params.processed_check_in_data_key}}",
                 "--users-input-path", "s3://{{ params.s3_bucket }}/{{ params.raw_user_data_key }}",
-                "--users-output-path", "s3://{{ params.s3_bucket }}/{{ params.processed_user_data_key }}",
                 "--friends-output-path", "s3://{{ params.s3_bucket }}/{{ params.processed_friend_data_key }}",
-                "--reviews-input-path", "s3://{{ params.s3_bucket }}/{{ params.raw_review_data_key }}",
-                "--reviews-output-path", "s3://{{ params.s3_bucket }}/{{ params.processed_review_data_key }}",
             ],
         },
     },
@@ -51,7 +48,7 @@ SPARK_STEPS = [
 
 JOB_FLOW_OVERRIDES = {
     "Name": "My cluster",
-    "ReleaseLabel": "emr-5.33.1",
+    "ReleaseLabel": "emr-6.5.0",
     "LogUri": f"{EMR_LOG_URI}",
     "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}],
     "Configurations": [
@@ -72,14 +69,8 @@ JOB_FLOW_OVERRIDES = {
                 "Name": "Master node",
                 "Market": "ON_DEMAND",
                 "InstanceRole": "MASTER",
-                "InstanceType": "m5.xlarge",
+                "InstanceType": "c6g.2xlarge",
                 "InstanceCount": 1
-            }, {
-                "Name": "Core - 2",
-                "Market": "ON_DEMAND",
-                "InstanceRole": "CORE",
-                "InstanceType": "m5.xlarge",
-                "InstanceCount": 2
             }
         ],
         "KeepJobFlowAliveWhenNoSteps": True,
@@ -157,10 +148,7 @@ def create_subdag(parent_dag_name: str, child_dag_name, args):
                 "raw_check_in_data_key": RAW_CHECK_IN_DATA_KEY,
                 "processed_check_in_data_key": PROCESSED_CHECK_IN_DATA_S3_KEY,
                 "raw_user_data_key": RAW_USERS_DATA_KEY,
-                "processed_user_data_key": PROCESSED_USERS_DATA_S3_KEY,
                 "processed_friend_data_key": PROCESSED_FRIEND_DATA_S3_KEY,
-                "raw_review_data_key": RAW_REVIEWS_DATA_S3_KEY,
-                "processed_review_data_key": PROCESSED_REVIEWS_DATA_S3_KEY,
                 "s3_script": S3_SCRIPT_KEY,
             },
             dag=dag,

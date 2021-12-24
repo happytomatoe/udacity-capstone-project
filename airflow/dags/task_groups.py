@@ -33,14 +33,14 @@ def create_staging_tasks(dag: DAG):
     stage_users = StageToRedshiftOperator(
         task_id='stage_users',
         s3_bucket=S3_BUCKET,
-        s3_key=PROCESSED_USERS_DATA_S3_KEY,
+        s3_key=RAW_USERS_DATA_KEY,
         schema=TABLES_SCHEMA,
         table="staging_users",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS CSV 
+            FORMAT AS JSON 'auto ignorecase'
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
@@ -50,14 +50,14 @@ def create_staging_tasks(dag: DAG):
     stage_reviews = StageToRedshiftOperator(
         task_id='stage_reviews',
         s3_bucket=S3_BUCKET,
-        s3_key=PROCESSED_REVIEWS_DATA_S3_KEY,
+        s3_key=RAW_REVIEWS_DATA_S3_KEY,
         schema=TABLES_SCHEMA,
         table="staging_reviews",
         redshift_conn_id=REDSHIFT_CONN_ID,
         aws_conn_id=AWS_CREDENTIALS_CONN_ID,
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
-            FORMAT AS CSV 
+            FORMAT AS JSON 'auto ignorecase'
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
@@ -92,6 +92,7 @@ def create_staging_tasks(dag: DAG):
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
             CSV
+            IGNOREHEADER 1
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
@@ -109,6 +110,7 @@ def create_staging_tasks(dag: DAG):
         copy_options=dedent("""
             COMPUPDATE OFF STATUPDATE OFF
             CSV
+            IGNOREHEADER 1
             TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
             TRUNCATECOLUMNS
             BLANKSASNULL;
