@@ -20,7 +20,7 @@ RAW_BUSINESS_DATA_S3_KEY = Variable.get("raw_business_data_s3_key", f"{RAW_DATA_
 RAW_REVIEWS_DATA_S3_KEY = Variable.get("raw_reviews_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_review.json")
 RAW_TIP_DATA_S3_KEY = Variable.get("raw_tip_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_tip.json")
 RAW_CHECK_IN_DATA_KEY = Variable.get("raw_check_in_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_checkin.json")
-RAW_USERS_DATA_KEY = Variable.get("raw_check_in_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_user.json")
+RAW_USERS_DATA_KEY = Variable.get("raw_user_data_s3_key", f"{RAW_DATA_PATH}/yelp_academic_dataset_user.json")
 
 
 PROCESSED_USERS_DATA_S3_KEY = Variable.get("processed_users_data_s3_key", f"{PROCESSED_DATA_PATH}/users/")

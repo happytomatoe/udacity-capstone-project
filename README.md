@@ -108,13 +108,13 @@ Before running the yelp dag:
 | aws_credentials_conn_id        | connection id used for s3 and EMR                                      | aws_credentials                              |
 | redshift_schema                | schema to be used to create/insert into tables                         | public                                       |
 | s3_bucket                      | s3 bucket used for raw/processed data                                  |                                              |
-| business_data_s3_key           | relative path in s3 bucket for business data                           | data/raw/yelp_academic_dataset_business.json |
-| users_data_s3_key              | relative path in s3 bucket for users data                              | data/raw/yelp_academic_dataset_user.json     |
-| reviews_data_s3_key            | relative path in s3 bucket for reviews data                            | data/raw/yelp_academic_dataset_review.json   |
-| tip_data_s3_key                | relative path in s3 bucket for tip data                                | data/raw/yelp_academic_dataset_tip.json      |
+| raw_business_data_s3_key       | relative path in s3 bucket for business data                           | data/raw/yelp_academic_dataset_business.json |
+| raw_user_data_s3_key           | relative path in s3 bucket for users data                              | data/raw/yelp_academic_dataset_user.json     |
+| raw_reviews_data_s3_key        | relative path in s3 bucket for reviews data                            | data/raw/yelp_academic_dataset_review.json   |
+| raw_tip_data_s3_key            | relative path in s3 bucket for tip data                                | data/raw/yelp_academic_dataset_tip.json      |
 | raw_check_in_data_s3_key       | relative path in s3 bucket for check-in data                           | data/raw/yelp_academic_dataset_checkin.json  |
 | processed_check_in_data_s3_key | relative path in s3 bucket for processed check-in data                 | data/processed/check-ins/                    |
-| friend_data_s3_key             | relative path in s3 bucket for processed friend data                   | data/processed/friends/                      |
+| processed_friend_data_s3_key   | relative path in s3 bucket for processed friend data                   | data/processed/friends/                      |
 | emr_credentials_conn_id        | connection id used to create EMR cluster                               | emr_credentials                              |
 | aws_region                     | aws region used to create EMR cluster                                  | us-west-2                                    |
 | emr_log_uri                    | EMR cluster logs location                                              |                                              |
