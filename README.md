@@ -4,7 +4,7 @@
 </p>
 
 # Description
-In this project the goal is to build data warehouse tables that later can be used for EDA. So the datawehouse should be 
+In this project the goal is to build data warehouse tables that later can be used for EDA. The data warehouse should be 
 able to give an answer to questions like:
 - Rating distribution
 - Show number of businesses by category
@@ -45,7 +45,7 @@ use to answer questions regarding different aspects of the provided data.
 - fact_friend - factless fact table to represent user-friend relation
 - fact_business_category - factless fact table to represent business-category relation. Business categories are 
 represented as list in the json source file. Currently, in the [insert query](airflow/plugins/helpers/table_insert_queries.py) 
-there is a sequence that is used to split the list from the json. Currently, there is a small number of categories(<100).
+there is a sequence that is used to split the list from the json. Currently, the max number of categories is about 20.
 This small number makes it viable to unnest list using data warehouse
 - fact_tip - fact tables for tips.
 - fact_checkin - fact table for checkins.  Check-in dates are represented as list in a json file. Splitting this list using 
