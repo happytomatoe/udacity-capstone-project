@@ -25,7 +25,7 @@ The dataset contains 8,635,403 reviews, 160,585 businesses, 1,162,119 tips by 2,
 Aggregated check-ins over time for each of the 138,876 businesses. <br>
 Information about businesses covers 8 metropolitan areas in the USA and Canada.
 
-There dataset on yelp's website contains 
+The dataset on yelp's website contains 
 [description of the fields in the json files](https://www.yelp.com/dataset/documentation/main).
 
 ## Steps necessary to clean the data
