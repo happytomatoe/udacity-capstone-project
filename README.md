@@ -127,8 +127,8 @@ Password - aws_secret_key. Set the region name in the "Extra" field(used by spar
     "region_name": "us-east-1"
    }   
     ```
-2) emr_credentials. Just copy aws_credentials without extra field.
-3) redshift. Select connection type - Postgres, and populate other details
+- emr_credentials. Just copy aws_credentials without extra field.
+- redshift. Select connection type - Postgres, and populate other details
 
 ### Setting up Redshift
 [Dwh folder](/dwh) contains instructions on how to create Redshift cluster. 
