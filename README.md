@@ -185,10 +185,10 @@ should increase cluster throughput:
 4) change max concurrency scaling parameter 
 
 # EDA
-Let's try to answer the questions that was described in the goal section. As the new redshift 
-query edit has a feature to draw charts let's use that.
+Let's answer the questions that was described in the description section. As the new redshift 
+query editor has a feature to draw charts let's use that.
 
-- Rating distribution
+- Show rating distribution
 ![](docs/rating_distribution.png)
 - Show number of businesses by category
 ![](docs/num_businesses_by_category.png)
