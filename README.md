@@ -195,9 +195,9 @@ query edit has a feature to draw charts let's use that.
 ![](docs/num_businesses_by_state_city.png)
 - Find top businesses in the city in the city Orlando
 - ![](docs/top_businesses_in_orlando.png)
-- Show how review count grows per selected business by time for the top business in the city Orlando
+- Show how review count grows by time for the top business in the city Orlando
 ![](docs/cafe_tu_tango_num_of_reviews_per_year.png)
-- Customer satisfaction changes over period of time for selected business
+- Customer satisfaction changes over period of time for the selected business
 ![](docs/avg_customer_satisfaction.png)
 - Get top users by review count
 ![](docs/top_user_by_review_count.png)
