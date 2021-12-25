@@ -39,7 +39,7 @@ As the goal of this project is exploratory data analysis, there are a lot of tab
 use to answer questions regarding different aspects of the provided data.
 
 ### Overview of the tables:
-- fact_review. As the heart of this dataset are the users' review this table represents different aspects of this review. 
+- fact_review. As the heart of this dataset is the users' reviews, this table represents different aspects of this review.
 - fact_friend - factless fact table to represent user-friend relation
 - fact_business_category - factless fact table to represent business-category relation. Business categories are 
 represented as list in the json source file. Currently, in the [insert query](airflow/plugins/helpers/table_insert_queries.py) 
