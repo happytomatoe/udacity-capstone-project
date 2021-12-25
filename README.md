@@ -198,7 +198,7 @@ query editor has a feature to draw charts let's use that.
 - ![](docs/top_businesses_in_orlando.png)
 - Show how reviews count changes over time for the top business in Orlando
 ![](docs/cafe_tu_tango_num_of_reviews_per_year.png)
-- Customer satisfaction changes over time for the selected business
+- How customer satisfaction changes over time for the selected business
 ![](docs/avg_customer_satisfaction.png)
 - Get top users by review count
 ![](docs/top_user_by_review_count.png)
