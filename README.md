@@ -119,7 +119,7 @@ Before running the yelp dag:
 | aws_region                     | aws region used to create EMR cluster                                  | us-west-2                                    |
 | emr_log_uri                    | EMR cluster logs location                                              |                                              |
 
-2) Add airflow connections with following connection names (according to previous step):
+2) Add airflow connections with following connection names (according to the previous step):
 - aws_credentials. Connection type - Amazon Web Services, Login= aws_access_key,
 Password - aws_secret_key. Set the region name in the "Extra" field(used by spark) 
    ```json
@@ -145,7 +145,7 @@ aws iam list-roles | grep 'EMR_DefaultRole\|EMR_EC2_DefaultRole'
   "RoleName": "EMR_DefaultRole",
   "RoleName": "EMR_EC2_DefaultRole",
 ```
-If the roles not present, create them using the following command
+If the roles are not present, create them using the following command
 
 ```shell
 aws emr create-default-roles
@@ -154,34 +154,35 @@ aws emr create-default-roles
 # Scenarios
 - If the data was increased by 100x <br>
 
-Currently, the dataset has about 10.5 GB of data if we do not take into account processed data.
+Currently, the dataset has about 10.5 GB of data, if we do not take into account processed data.
 So if the data was increased by 100x it's about 1 TB. Increasing redshift cluster and EMR cluster 
 sizes should accommodate the data increase. After the data increase there will be some performance
 bottlenecks. Probably on the redshift side. And good performance analysis should identify them. After which we can propose
-some recommendations. Currently, the most of the pipeline time is spent on copying reviews to the staging table. It's mostly 
-because it has 1 file with 6.5 GB of data.
-So if we would have more data, having partition size with equal size and compression would make more difference.
-As it is written in [copy command docs](https://docs.aws.amazon.com/redshift/latest/dg/t_loading-tables-from-s3.html) 
+some recommendations. Currently, the most of the pipeline's time is spent on copying reviews to the staging table. It's mostly 
+because the dataset has 1 file with 6.5 GB of data.
+Accroding to [the aws documentation](https://docs.aws.amazon.com/redshift/latest/dg/t_loading-tables-from-s3.html)
 > Before uploading the file to Amazon S3, split the file into multiple files so that the COPY command can load it using 
 > parallel processing. The number of files should be a multiple of the number of slices in your
 > cluster. Split your load data files so that the files are about equal size, between 1 MB and 1 GB after compression.
 
 - If the pipelines were run on a daily basis by 7am
 
-Currently, pipeline is build as one time job. To support continuous DML changes next thing would be needed:
-1) Add upsert functionality and slowly changing dimensions if needed
+Currently, the ETL pipeline is built as a one time job. To support continuous DML changes next things would be needed:
+1) Add upsert functionality. And slowly changing dimensions if needed
 2) Add surrogate keys for tables
-3) Add some unique identifier (like date) for raw and processed s3 zones
-4) If needed enable catch up flag
-5) it would also make sense to change existing logic and add some timeout for current airflow tasks
+3) Add some unique identifier (like date) as a part of the s3 path for raw and processed data zones
+4) Enable catch up flag if needed 
+5) it would also make sense to change existing logic and add some timeout for current airflow tasks(like waiting for spark step to complete)
+
 - If the database needed to be accessed by 100+ people
 
-As there is a limitation for redshift - each user defined queue can handle maximum 50 concurrent queries next steps 
-should increase cluster throughput 
+As there is a limitation for redshift - each user defined queue can handle maximum 50 concurrent queries, next steps 
+should increase cluster throughput:
 
-1) set up  queues/query priorities/query groups in workload manager
-2) enable concurrency scaling feature for queues which can have spikes in load
-3) change max concurrency scaling parameter 
+1) use AWS IAM or Aws Cognitor to manage access control to the cluster
+2) set up  queues/query priorities/query groups in workload manager. For example we can have queues for BI users, ETL user and Data Scientists
+3) enable concurrency scaling feature for queues which can have spikes in load
+4) change max concurrency scaling parameter 
 
 # EDA
 Let's try to answer the questions that was described in the goal section. As the new redshift 
@@ -193,15 +194,15 @@ query edit has a feature to draw charts let's use that.
 ![](docs/num_businesses_by_category.png)
 - Show number of businesses by state, city
 ![](docs/num_businesses_by_state_city.png)
-- Find top businesses in the city in the city Orlando
+- Find top businesses in Orlando
 - ![](docs/top_businesses_in_orlando.png)
-- Show how review count grows by time for the top business in the city Orlando
+- Show how reviews count changes over time for the top business in Orlando
 ![](docs/cafe_tu_tango_num_of_reviews_per_year.png)
-- Customer satisfaction changes over period of time for the selected business
+- Customer satisfaction changes over time for the selected business
 ![](docs/avg_customer_satisfaction.png)
 - Get top users by review count
 ![](docs/top_user_by_review_count.png)
-- Show how many customers check in based on time of day for top business in Orlando from 2018-2020
+- Show how many customers check in based on a time of day for top business in Orlando from 2018-2020
 ![](docs/customer_check_in_count_based_on_time_of_day.png)
 - Check-ins distribution by day of week
 ![](docs/check_in_distribution.png)
