@@ -39,29 +39,29 @@ As the goal of this project is exploratory data analysis, there are a lot of tab
 use to answer questions regarding different aspects of the provided data.
 
 ### Overview of the tables:
-- fact_review. As the heart of this dataset is the users' reviews, this table represents different aspects of this review.
-- fact_friend - factless fact table to represent user-friend relation
-- fact_business_category - factless fact table to represent business-category relation. Business categories are 
-represented as list in the json source file. Currently, in the [insert query](airflow/plugins/helpers/table_insert_queries.py) 
+- fact_review. As the heart of this dataset is the users' reviews, this table represents different aspects of this review
+- fact_friend - factless fact table that represents user-friend relation
+- fact_business_category - factless fact table that represents business-category relation. Business categories are 
+represented as a list in the json source file. Currently, in the [insert query](airflow/plugins/helpers/table_insert_queries.py) 
 there is a sequence that is used to split the list from the json. Currently, the max number of categories is about 20.
-This small number makes it viable to unnest list using data warehouse
-- fact_tip - fact tables for tips.
+This small number makes it viable to unnest list using the data warehouse
+- fact_tip - fact tables for tips
 - fact_checkin - fact table for checkins.  Check-in dates are represented as list in a json file. Splitting this list using 
-data warehouse takes a long time as there are a lot of check-ins. Instead, it is done using Spark framework. 
-- dim_business - business dimension table.
-- dim_user - user dimension table.
-- dim_date - date dimension table. This dimension is populated using [csv file](airflow/dags/data/dim_date.csv). 
+data warehouse takes a long time as there are a lot of check-ins. Instead, it is done using Spark framework 
+- dim_business - business dimension table
+- dim_user - user dimension table
+- dim_date - date dimension table. This dimension is populated using [csv file](airflow/dags/data/dim_date.csv)
 
 
-Data dictionary with the column description/source is included in the [data dictionary file](data_dictionary.txt)
+Data dictionary with the column description/source is included in the [data dictionary file](data_dictionary.txt).
 
 
 # Architecture
 ![img.png](docs/architecture.png)
 
 ## Overview
-The user flow is next - the data is copied into raw data zone. After this user should trigger 
-airlfow dag manually to kick of the pipeline. After the end of the pipeline the target tables are populated.
+The user flow is next - the data is copied into raw data zone. After this a user should trigger 
+airlfow dag manually to kick of the pipeline. At the end of the pipeline the target tables are populated.
 
 ## ETL flow
 - Spark job, that is run on the an EMR cluster, transforms data using s3 
@@ -77,14 +77,15 @@ airlfow dag manually to kick of the pipeline. After the end of the pipeline the 
 
 ### Hardware used: 
 
-EMR - currently it's more than enough to spawn 3 m5.xlarge EC2 instances which have:
+EMR - I used 3 m5.xlarge EC2 instances which have:
 ```
 4 vCore, 16 GiB memory, EBS only storage
 EBS Storage:64 GiB
 ```
+The executution time of the spark pipeline is about 3 minutes. 
 This configuration is located in [the spark subdag file](airflow/dags/yelp_spark_pipeline.py)
 
-Redshift - Currently I spawn redshift cluster with 2 dc2.large instances
+Redshift - Currently I use redshift cluster with 2 dc2.large instances
 
 ### Setting up Airflow
 
