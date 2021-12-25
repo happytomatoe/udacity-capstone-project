@@ -4,14 +4,14 @@
 </p>
 
 # Description
-In this project the goal is to build data warehouse tables that later can be used for EDA. The data warehouse should be 
-able to give an answer to questions like:
+The goal of this project is to build a data warehouse that can be used for EDA. The data warehouse should be 
+able to answer questions like:
 - Rating distribution
 - Show number of businesses by category
 - Show number of businesses by city
 - Find top businesses in the city
 - Show how review count grows per selected business by time
-- Customer satisfaction changes over period of time for selected business
+- Customer satisfaction changes over time for selected business
 - Find top businesses by location
 - Find top business in the category
 - Get top users by review count
@@ -20,13 +20,12 @@ able to give an answer to questions like:
 
 # Data Source
 
-In this project this dataset was used - https://www.kaggle.com/yelp-dataset/yelp-dataset. <br>
+This project uses [yelp dataset on kaggle](https://www.kaggle.com/yelp-dataset/yelp-dataset). <br>
 The dataset contains 8,635,403 reviews, 160,585 businesses, 1,162,119 tips by 2,189,457 users.<br> 
 Aggregated check-ins over time for each of the 138,876 businesses. <br>
 Information about businesses covers 8 metropolitan areas in the USA and Canada.
 
-The dataset on yelp's website contains 
-[description of the fields in the json files](https://www.yelp.com/dataset/documentation/main).
+There is also a [description for json files and fields in them on yelp's website](https://www.yelp.com/dataset/documentation/main).
 
 ## Steps necessary to clean the data
 As this is an academic dataset it was already cleaned up for the most part. When inserting data into
@@ -36,11 +35,11 @@ blank values
 ## Data Model
 
 ![img.png](docs/datawehouse_schema.png)
-As the goal of this project is exploratory data analysis there are a lot of tables which data scientist/analysts can 
+As the goal of this project is exploratory data analysis, there are a lot of tables which data scientist/analysts can 
 use to answer questions regarding different aspects of the provided data.
 
 ### Overview of the tables:
-- fact_review. As the heart of the data is the users' review this table represents different aspects of this review. 
+- fact_review. As the heart of this dataset are the users' review this table represents different aspects of this review. 
 - fact_friend - factless fact table to represent user-friend relation
 - fact_business_category - factless fact table to represent business-category relation. Business categories are 
 represented as list in the json source file. Currently, in the [insert query](airflow/plugins/helpers/table_insert_queries.py) 
