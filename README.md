@@ -65,7 +65,7 @@ The user flow is next - the data is copied into raw data zone. After this user s
 airlfow dag manually to kick of the pipeline. After the end of the pipeline the target tables are populated.
 
 ## ETL flow
-- Spark job that is run on the EMR cluster transforms data using s3
+- Spark job, that is run on the an EMR cluster, transforms data using s3 
 - Warehouse schema is created 
 - Date dimension is created and populated
 - Staging area is populated
