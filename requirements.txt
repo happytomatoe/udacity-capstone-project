@@ -1,5 +1,5 @@
 pyspark
-apache-airflow == 1.10.15
+apache-airflow == 2.6.0
 
 # tests
 findspark
